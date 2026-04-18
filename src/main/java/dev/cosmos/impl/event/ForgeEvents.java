@@ -9,8 +9,5 @@ import net.minecraftforge.fml.common.Mod;
 @Mod.EventBusSubscriber(modid = Cosmos.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ForgeEvents {
 
-    @SubscribeEvent
-    public static void onAddReloadListeners(AddReloadListenerEvent event) {
-        event.addListener(new CosmosDataManager());
-    }
+
 }

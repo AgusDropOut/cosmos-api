@@ -1,55 +1,48 @@
 package dev.cosmos.impl.data;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import dev.cosmos.Cosmos;
-import dev.cosmos.api.data.MaterialDefinition;
 import dev.cosmos.api.data.TrailDefinition;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
-import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CosmosDataManager extends SimpleJsonResourceReloadListener {
-    private static final Gson GSON = new GsonBuilder().create();
-    private static final String FOLDER = "cosmos_data";
+public class CosmosDataManager implements ResourceManagerReloadListener {
 
-    public static final Map<ResourceLocation, MaterialDefinition> MATERIALS = new HashMap<>();
     public static final Map<ResourceLocation, TrailDefinition> TRAILS = new HashMap<>();
-
-    public CosmosDataManager() {
-        super(GSON, FOLDER);
-    }
+    private static final Gson GSON = new Gson();
 
     @Override
-    protected void apply(Map<ResourceLocation, JsonElement> elements, ResourceManager resourceManager, ProfilerFiller profiler) {
-        MATERIALS.clear();
+    public void onResourceManagerReload(ResourceManager resourceManager) {
         TRAILS.clear();
 
-        elements.forEach((location, jsonElement) -> {
-            try {
-                JsonObject jsonObject = jsonElement.getAsJsonObject();
-                if (!jsonObject.has("type")) return;
+        Map<ResourceLocation, Resource> trailFiles = resourceManager.listResources("cosmos_data",
+                location -> location.getPath().endsWith(".trail.csm.json"));
 
-                String type = jsonObject.get("type").getAsString();
+        trailFiles.forEach((location, resource) -> {
+            try (InputStreamReader reader = new InputStreamReader(resource.open(), StandardCharsets.UTF_8)) {
+                JsonObject json = GSON.fromJson(reader, JsonObject.class);
 
-                if (type.equals("cosmos:material")) {
-                    MaterialDefinition mat = GSON.fromJson(jsonElement, MaterialDefinition.class);
-                    MATERIALS.put(location, mat);
-                } else if (type.equals("cosmos:trail_system")) {
-                    TrailDefinition trail = GSON.fromJson(jsonElement, TrailDefinition.class);
-                    TRAILS.put(location, trail);
+                if (json.has("type") && json.get("type").getAsString().equals("cosmos:trail_system")) {
+                    String namespace = json.get("namespace").getAsString();
+                    String id = json.get("id").getAsString();
+                    ResourceLocation trailId = new ResourceLocation(namespace, id);
+
+                    TrailDefinition def = GSON.fromJson(json, TrailDefinition.class);
+                    TRAILS.put(trailId, def);
+
+                    Cosmos.LOGGER.info("Cosmos API: Loaded Trail Definition [{}]", trailId);
                 }
             } catch (Exception e) {
-                Cosmos.LOGGER.error("Failed to parse Cosmos data file: {}", location, e);
+                Cosmos.LOGGER.error("Cosmos API: Failed to parse trail definition at {}", location, e);
             }
         });
-
-        Cosmos.LOGGER.info("Loaded {} Cosmos Materials and {} Trail Systems.", MATERIALS.size(), TRAILS.size());
     }
 }

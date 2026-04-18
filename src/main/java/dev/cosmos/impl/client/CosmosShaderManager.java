@@ -76,15 +76,25 @@ public class CosmosShaderManager {
             if (location.getPath().endsWith(".json") && location.getPath().startsWith("shaders/core/")) {
                 String fullShaderPath = namespace + ":" + shaderId;
 
+
                 String dummyJson = """
-                    {
-                        "blend": {"func": "add", "srcrgb": "srcalpha", "dstrgb": "1-srcalpha"},
-                        "vertex": "%s",
-                        "fragment": "%s",
-                        "attributes": ["Position", "Color", "UV0"],
-                        "samplers": [{"name": "Sampler0"}]
-                    }
-                    """.formatted(fullShaderPath, fullShaderPath);
+                {
+                    "blend": {
+                        "func": "add",
+                        "srcrgb": "srcalpha",
+                        "dstrgb": "1-srcalpha"
+                    },
+                    "vertex": "%s",
+                    "fragment": "%s",
+                    "attributes": ["Position", "Color", "UV0"],
+                    "samplers": [{"name": "Sampler0"}],
+                    "uniforms": [
+                        { "name": "ModelViewMat", "type": "matrix4x4", "count": 16, "values": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ] },
+                        { "name": "ProjMat", "type": "matrix4x4", "count": 16, "values": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ] },
+                        { "name": "CosmosTime", "type": "float", "count": 1, "values": [ 0.0 ] }
+                    ]
+                }
+                """.formatted(fullShaderPath, fullShaderPath);
 
                 return Optional.of(new Resource(null, () -> new ByteArrayInputStream(dummyJson.getBytes(StandardCharsets.UTF_8))));
             }

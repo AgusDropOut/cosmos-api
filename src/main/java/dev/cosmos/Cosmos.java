@@ -1,6 +1,8 @@
 package dev.cosmos;
 
 import com.mojang.logging.LogUtils;
+import dev.cosmos.init.ModEntityTypes;
+import dev.cosmos.init.ModItems;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -24,15 +26,14 @@ public class Cosmos {
     public static final String MODID = "cosmos";
     public static final Logger LOGGER = LogUtils.getLogger();
 
-    public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
-    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
+
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
 
     public Cosmos() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
-        BLOCKS.register(modEventBus);
-        ITEMS.register(modEventBus);
+        ModItems.register(modEventBus);
+        ModEntityTypes.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
 
         modEventBus.addListener(this::commonSetup);
