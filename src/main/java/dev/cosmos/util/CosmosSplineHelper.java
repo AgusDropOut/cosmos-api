@@ -4,6 +4,8 @@ import net.minecraft.world.phys.Vec3;
 
 public class CosmosSplineHelper {
 
+    //information on catmull-rom interpolation: https://en.wikipedia.org/wiki/Catmull%E2%80%93Rom_spline
+
     /**
      * Performs Catmull-Rom interpolation between p1 and p2.
      * @param p0 Control point before p1
