@@ -12,15 +12,8 @@ public class CosmosRenderEvents {
 
     @SubscribeEvent
     public static void onRenderLevelStage(RenderLevelStageEvent event) {
-
-        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
-
-            CosmosTrailManager.renderAllAndClear(
-                    event.getPoseStack(),
-                    event.getProjectionMatrix(),
-                    event.getCamera()
-            );
-
+        if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_LEVEL) {
+            CosmosTrailManager.renderAllAndClear();
         }
     }
 }

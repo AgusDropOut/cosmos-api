@@ -9,6 +9,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +31,8 @@ public class CosmosTestProjectileRenderer extends EntityRenderer<CosmosTestProje
     public void render(CosmosTestProjectile entity, float entityYaw, float partialTicks, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
         if (entity.history.isEmpty()) return;
 
+        Vec3 cameraPos = this.entityRenderDispatcher.camera.getPosition();
+
         double lerpX = Mth.lerp(partialTicks, entity.xo, entity.getX());
         double lerpY = Mth.lerp(partialTicks, entity.yo, entity.getY());
         double lerpZ = Mth.lerp(partialTicks, entity.zo, entity.getZ());
@@ -39,7 +42,19 @@ public class CosmosTestProjectileRenderer extends EntityRenderer<CosmosTestProje
         rawHistory.addAll(entity.history);
 
 
-        CosmosTrailManager.submitTrail(TRAIL_ID, rawHistory);
+        float relX = (float) (lerpX - cameraPos.x());
+        float relY = (float) (lerpY - cameraPos.y());
+        float relZ = (float) (lerpZ - cameraPos.z());
+
+
+        PoseStack viewStack = new PoseStack();
+        viewStack.last().pose().set(poseStack.last().pose());
+        viewStack.translate(-relX, -relY, -relZ);
+
+        Matrix4f pureCameraMatrix = viewStack.last().pose();
+
+
+        CosmosTrailManager.submitTrail(TRAIL_ID, rawHistory, cameraPos, pureCameraMatrix);
 
         super.render(entity, entityYaw, partialTicks, poseStack, bufferSource, packedLight);
     }
