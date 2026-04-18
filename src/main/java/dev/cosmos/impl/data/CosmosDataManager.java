@@ -1,12 +1,12 @@
-package cosmos.impl.data;
+package dev.cosmos.impl.data;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import cosmos.Cosmos;
-import cosmos.api.data.MaterialDefinition;
-import cosmos.api.data.TrailDefinition;
+import dev.cosmos.Cosmos;
+import dev.cosmos.api.data.MaterialDefinition;
+import dev.cosmos.api.data.TrailDefinition;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;

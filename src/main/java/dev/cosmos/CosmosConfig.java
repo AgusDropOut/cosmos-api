@@ -1,4 +1,4 @@
-package cosmos;
+package dev.cosmos;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;

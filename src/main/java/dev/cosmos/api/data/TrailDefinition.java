@@ -1,4 +1,4 @@
-package cosmos.api.data;
+package dev.cosmos.api.data;
 
 import com.google.gson.annotations.SerializedName;
 

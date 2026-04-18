@@ -1,7 +1,7 @@
-package cosmos.impl.event;
+package dev.cosmos.impl.event;
 
-import cosmos.Cosmos;
-import cosmos.impl.data.CosmosDataManager;
+import dev.cosmos.Cosmos;
+import dev.cosmos.impl.data.CosmosDataManager;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
