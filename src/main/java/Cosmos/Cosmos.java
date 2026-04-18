@@ -1,4 +1,4 @@
-package Cosmos;
+package cosmos;
 
 import com.mojang.logging.LogUtils;
 import net.minecraft.core.registries.Registries;
