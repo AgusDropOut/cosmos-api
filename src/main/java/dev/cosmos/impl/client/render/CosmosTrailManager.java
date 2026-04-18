@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.*;
 import dev.cosmos.api.data.TrailDefinition;
 import dev.cosmos.impl.client.CosmosShaderManager;
 import dev.cosmos.impl.data.CosmosDataManager;
+import dev.cosmos.util.CosmosSplineHelper;
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
@@ -19,12 +20,10 @@ public class CosmosTrailManager {
 
     private static final List<TrailData> ACTIVE_TRAILS = new ArrayList<>();
 
-
     public static void submitTrail(ResourceLocation trailId, List<Vec3> history) {
         if (history.size() < 2) return;
         ACTIVE_TRAILS.add(new TrailData(trailId, new ArrayList<>(history)));
     }
-
 
     public static void renderAllAndClear(PoseStack poseStack, Matrix4f projectionMatrix, Camera camera) {
         if (ACTIVE_TRAILS.isEmpty()) return;
@@ -32,20 +31,14 @@ public class CosmosTrailManager {
         Vec3 cameraPos = camera.getPosition();
         float time = (System.currentTimeMillis() % 100000L) / 1000.0F;
 
-
         RenderSystem.enableBlend();
-        RenderSystem.blendFunc(
-                com.mojang.blaze3d.platform.GlStateManager.SourceFactor.SRC_ALPHA,
-                com.mojang.blaze3d.platform.GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA
-        );
-
-
-
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.disableCull();
+        RenderSystem.depthMask(false);
 
         Matrix4f matrix = poseStack.last().pose();
         Tesselator tess = Tesselator.getInstance();
         BufferBuilder buffer = tess.getBuilder();
-
 
         for (TrailData data : ACTIVE_TRAILS) {
             TrailDefinition trailDef = CosmosDataManager.TRAILS.get(data.trailId);
@@ -60,15 +53,38 @@ public class CosmosTrailManager {
                 shader.getUniform("CosmosTime").set(time);
             }
 
+            List<Vec3> raw = data.history;
+            List<Vec3> points = new ArrayList<>();
+            points.add(raw.get(0));
+            points.addAll(raw);
+            points.add(raw.get(raw.size() - 1));
+
+            List<Vec3> smoothHistory = new ArrayList<>();
+            int subdivisions = 4;
+
+            for (int i = 1; i < points.size() - 2; i++) {
+                Vec3 p0 = points.get(i - 1);
+                Vec3 p1 = points.get(i);
+                Vec3 p2 = points.get(i + 1);
+                Vec3 p3 = points.get(i + 2);
+
+                for (int j = 0; j < subdivisions; j++) {
+                    double t = (double) j / subdivisions;
+                    smoothHistory.add(CosmosSplineHelper.catmullRom(p0, p1, p2, p3, t));
+                }
+            }
+            smoothHistory.add(raw.get(raw.size() - 1));
+
             buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
 
-            int size = data.history.size();
-            float vStep = 2.0F / (size - 1);
+            int size = smoothHistory.size();
+            float vStep = 1.0F / (size - 1);
             float baseWidth = 0.4f;
 
             for (int i = 0; i < size - 1; i++) {
-                Vec3 current = data.history.get(i);
-                Vec3 next = data.history.get(i + 1);
+
+                Vec3 current = smoothHistory.get(i);
+                Vec3 next = smoothHistory.get(i + 1);
 
                 Vector3f dir = new Vector3f((float) (next.x - current.x), (float) (next.y - current.y), (float) (next.z - current.z));
                 if (dir.lengthSquared() < 0.0001f) continue;
@@ -86,7 +102,6 @@ public class CosmosTrailManager {
 
                 float v1 = 1.0F - (i * vStep);
                 float v2 = 1.0F - ((i + 1) * vStep);
-
 
                 float cx = (float) (current.x - cameraPos.x);
                 float cy = (float) (current.y - cameraPos.y);
@@ -106,11 +121,9 @@ public class CosmosTrailManager {
             tess.end();
         }
 
-
-
-
+        RenderSystem.enableCull();
+        RenderSystem.depthMask(true);
         RenderSystem.disableBlend();
-        RenderSystem.defaultBlendFunc();
         ACTIVE_TRAILS.clear();
     }
 
