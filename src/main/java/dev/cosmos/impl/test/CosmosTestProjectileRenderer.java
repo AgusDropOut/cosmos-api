@@ -16,7 +16,7 @@ import java.util.List;
 
 public class CosmosTestProjectileRenderer extends EntityRenderer<CosmosTestProjectile> {
 
-    private static final ResourceLocation TRAIL_ID = new ResourceLocation("cosmos", "my_first_project");
+    private static final ResourceLocation TRAIL_ID = new ResourceLocation("cosmos", "fire");
 
     public CosmosTestProjectileRenderer(EntityRendererProvider.Context context) {
         super(context);

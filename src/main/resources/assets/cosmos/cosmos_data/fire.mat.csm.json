@@ -1,0 +1,11 @@
+{
+    "namespace": "cosmos",
+    "id": "fire",
+    "type": "cosmos:material",
+    "config": {
+        "render_state": {
+            "transparency": "OPAQUE",
+            "depth_test": "LEQUAL"
+        }
+    }
+}

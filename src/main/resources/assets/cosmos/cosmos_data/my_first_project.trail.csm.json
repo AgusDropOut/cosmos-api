@@ -1,0 +1,11 @@
+{
+    "namespace": "cosmos",
+    "id": "my_first_project",
+    "type": "cosmos:trail_system",
+    "config": {
+        "history_segments": 50,
+        "width_curve": "sin(time * 10.0)",
+        "orbit_offset": "sin(time * 1.0)",
+        "material_id": "cosmos:my_first_project"
+    }
+}

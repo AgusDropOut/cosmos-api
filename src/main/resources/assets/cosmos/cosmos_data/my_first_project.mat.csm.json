@@ -1,0 +1,11 @@
+{
+    "namespace": "cosmos",
+    "id": "my_first_project",
+    "type": "cosmos:material",
+    "config": {
+        "render_state": {
+            "transparency": "OPAQUE",
+            "depth_test": "LEQUAL"
+        }
+    }
+}
