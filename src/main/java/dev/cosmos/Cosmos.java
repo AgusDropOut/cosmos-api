@@ -1,6 +1,8 @@
 package dev.cosmos;
 
 import com.mojang.logging.LogUtils;
+import dev.cosmos.api.registry.CosmosDataRegistry;
+import dev.cosmos.impl.data.handler.TrailDataHandler;
 import dev.cosmos.init.ModEntityTypes;
 import dev.cosmos.init.ModItems;
 import net.minecraft.core.registries.Registries;
@@ -35,6 +37,8 @@ public class Cosmos {
         ModItems.register(modEventBus);
         ModEntityTypes.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
+
+        CosmosDataRegistry.register("cosmos:trail_system", new TrailDataHandler());
 
         modEventBus.addListener(this::commonSetup);
 

@@ -5,7 +5,9 @@ import com.mojang.blaze3d.vertex.*;
 import dev.cosmos.api.data.TrailDefinition;
 import dev.cosmos.impl.client.CosmosShaderManager;
 import dev.cosmos.impl.data.CosmosDataManager;
+import dev.cosmos.impl.data.handler.TrailDataHandler;
 import dev.cosmos.util.CosmosSplineHelper;
+import dev.cosmos.util.math.MathExpression;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
@@ -37,7 +39,6 @@ public class CosmosTrailManager {
 
         float time = (System.currentTimeMillis() % 100000L) / 1000.0F;
 
-
         Matrix4f currentProj = new Matrix4f(RenderSystem.getProjectionMatrix());
         PoseStack rsStack = RenderSystem.getModelViewStack();
         rsStack.pushPose();
@@ -47,24 +48,14 @@ public class CosmosTrailManager {
         rsStack.mulPoseMatrix(savedModelView);
         RenderSystem.applyModelViewMatrix();
 
-
-        RenderSystem.enableBlend();
-        RenderSystem.blendFunc(
-                com.mojang.blaze3d.platform.GlStateManager.SourceFactor.SRC_ALPHA,
-                com.mojang.blaze3d.platform.GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA
-        );
-        RenderSystem.disableCull();
-        RenderSystem.depthMask(false);
-        RenderSystem.enableDepthTest();
+        CosmosRenderState.beginBatch();
 
         Tesselator tess = Tesselator.getInstance();
         BufferBuilder buffer = tess.getBuilder();
-
-
         Matrix4f IDENTITY = new Matrix4f();
 
         for (TrailData data : ACTIVE_TRAILS) {
-            TrailDefinition trailDef = CosmosDataManager.TRAILS.get(data.trailId);
+            TrailDefinition trailDef = TrailDataHandler.TRAILS.get(data.trailId);
             if (trailDef == null) continue;
 
             ShaderInstance shader = CosmosShaderManager.SHADERS.get(new ResourceLocation(trailDef.config.materialId));
@@ -75,21 +66,21 @@ public class CosmosTrailManager {
                 shader.getUniform("CosmosTime").set(time);
             }
 
+            CosmosRenderState.setup(trailDef.config.render_state);
+
             List<Vec3> smoothHistory = generateSmoothHistory(data.history);
             buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
-
-            renderTrailGeometry(buffer, IDENTITY, smoothHistory, data.cameraPos, 0.4f);
+            renderTrailGeometry(buffer, IDENTITY, smoothHistory, data.cameraPos, trailDef.compiledWidth, time);
             tess.end();
-        }
 
+            CosmosRenderState.restoreToBatchDefault();
+        }
 
         rsStack.popPose();
         RenderSystem.applyModelViewMatrix();
         RenderSystem.setProjectionMatrix(currentProj, VertexSorting.ORTHOGRAPHIC_Z);
 
-        RenderSystem.enableCull();
-        RenderSystem.depthMask(true);
-        RenderSystem.disableBlend();
+        CosmosRenderState.endBatch();
         ACTIVE_TRAILS.clear();
     }
 
@@ -110,7 +101,7 @@ public class CosmosTrailManager {
         return smooth;
     }
 
-    private static void renderTrailGeometry(BufferBuilder buffer, Matrix4f identity, List<Vec3> smoothHistory, Vec3 cameraPos, float width) {
+    private static void renderTrailGeometry(BufferBuilder buffer, Matrix4f identity, List<Vec3> smoothHistory, Vec3 cameraPos, MathExpression widthCurve, float time) {
         int size = smoothHistory.size();
         for (int i = 0; i < size - 1; i++) {
             Vec3 curr = smoothHistory.get(i);
@@ -121,12 +112,21 @@ public class CosmosTrailManager {
             dir.normalize();
 
             Vector3f toCam = new Vector3f((float)(cameraPos.x - curr.x), (float)(cameraPos.y - curr.y), (float)(cameraPos.z - curr.z)).normalize();
-            Vector3f side = new Vector3f();
-            dir.cross(toCam, side);
-            side.normalize().mul(width);
 
             float v1 = 1.0F - ((float) i / size);
             float v2 = 1.0F - ((float) (i + 1) / size);
+
+            float width1 = widthCurve.evaluate(time, v1);
+            float width2 = widthCurve.evaluate(time, v2);
+
+            Vector3f side1 = new Vector3f();
+            dir.cross(toCam, side1);
+            side1.normalize().mul(width1);
+
+            Vector3f side2 = new Vector3f();
+            dir.cross(toCam, side2);
+            side2.normalize().mul(width2);
+
             float alpha = 1.0F - ((float) i / size);
 
             float cx = (float) (curr.x - cameraPos.x);
@@ -137,10 +137,10 @@ public class CosmosTrailManager {
             float ny = (float) (next.y - cameraPos.y);
             float nz = (float) (next.z - cameraPos.z);
 
-            buffer.vertex(identity, cx - side.x, cy - side.y, cz - side.z).color(1f, 1f, 1f, alpha).uv(0, v1).endVertex();
-            buffer.vertex(identity, cx + side.x, cy + side.y, cz + side.z).color(1f, 1f, 1f, alpha).uv(1, v1).endVertex();
-            buffer.vertex(identity, nx + side.x, ny + side.y, nz + side.z).color(1f, 1f, 1f, alpha).uv(1, v2).endVertex();
-            buffer.vertex(identity, nx - side.x, ny - side.y, nz - side.z).color(1f, 1f, 1f, alpha).uv(0, v2).endVertex();
+            buffer.vertex(identity, cx - side1.x, cy - side1.y, cz - side1.z).color(1f, 1f, 1f, alpha).uv(0, v1).endVertex();
+            buffer.vertex(identity, cx + side1.x, cy + side1.y, cz + side1.z).color(1f, 1f, 1f, alpha).uv(1, v1).endVertex();
+            buffer.vertex(identity, nx + side2.x, ny + side2.y, nz + side2.z).color(1f, 1f, 1f, alpha).uv(1, v2).endVertex();
+            buffer.vertex(identity, nx - side2.x, ny - side2.y, nz - side2.z).color(1f, 1f, 1f, alpha).uv(0, v2).endVertex();
         }
     }
 
