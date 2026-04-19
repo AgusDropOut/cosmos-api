@@ -37,7 +37,7 @@ public class CosmosTrailManager {
     public static void renderAllAndClear() {
         if (ACTIVE_TRAILS.isEmpty()) return;
 
-        float time = (System.currentTimeMillis() % 100000L) / 1000.0F;
+        float time = (System.currentTimeMillis() % 100000L) ;
 
         Matrix4f currentProj = new Matrix4f(RenderSystem.getProjectionMatrix());
         PoseStack rsStack = RenderSystem.getModelViewStack();
@@ -63,7 +63,7 @@ public class CosmosTrailManager {
 
             RenderSystem.setShader(() -> shader);
             if (shader.getUniform("CosmosTime") != null) {
-                shader.getUniform("CosmosTime").set(time);
+                shader.getUniform("CosmosTime").set(time*0.001f);
             }
 
             CosmosRenderState.setup(trailDef.config.render_state);
