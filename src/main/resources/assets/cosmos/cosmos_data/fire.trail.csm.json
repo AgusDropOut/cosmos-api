@@ -4,8 +4,8 @@
     "type": "cosmos:trail_system",
     "config": {
         "history_segments": 30,
-        "width_curve": "1.0",
-        "orbit_offset": "1.0",
+        "width_curve": "max(abs(sin((time * 5.0))), 0.2)",
+        "orbit_offset": "vec3((sin((time * 9.0)) * 1.5), (cos((time * 9.0)) * 1.5), (0.0 * 1.5))",
         "material_id": "cosmos:fire"
     }
 }

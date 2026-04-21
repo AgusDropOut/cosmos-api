@@ -35,7 +35,8 @@ public class CosmosTrailManager {
     public static void renderAllAndClear() {
         if (ACTIVE_TRAILS.isEmpty()) return;
 
-        float time = (System.currentTimeMillis() % 100000L);
+
+        float timeSeconds = (System.currentTimeMillis() % 100000L) / 1000.0f;
 
         Matrix4f currentProj = new Matrix4f(RenderSystem.getProjectionMatrix());
         PoseStack rsStack = RenderSystem.getModelViewStack();
@@ -61,14 +62,14 @@ public class CosmosTrailManager {
 
             RenderSystem.setShader(() -> shader);
             if (shader.getUniform("CosmosTime") != null) {
-                shader.getUniform("CosmosTime").set(time * 0.001f);
+                shader.getUniform("CosmosTime").set(timeSeconds); // Pass seconds
             }
 
             CosmosRenderState.setup(trailDef.config.render_state);
 
             List<Vec3> smoothHistory = generateSmoothHistory(data.history);
             buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
-            renderTrailGeometry(buffer, IDENTITY, smoothHistory, data.cameraPos, trailDef, time);
+            renderTrailGeometry(buffer, IDENTITY, smoothHistory, data.cameraPos, trailDef, timeSeconds);
             tess.end();
 
             CosmosRenderState.restoreToBatchDefault();
@@ -99,15 +100,13 @@ public class CosmosTrailManager {
         return smooth;
     }
 
-    // --- EXTRACTED EVALUATION METHODS ---
-
     private static float evaluateWidth(TrailDefinition def, float time, float progress) {
         if (def.compiledWidth == null) return 1.0f;
         return def.compiledWidth.evaluate(time, progress);
     }
 
     private static Vec3 applyOrbitOffset(TrailDefinition def, Vec3 basePos, float time, float progress) {
-        if (def.config.orbitOffset == null || def.compiledOffsetY == null || def.compiledOffsetZ == null) {
+        if (def.compiledOffsetX == null || def.compiledOffsetY == null || def.compiledOffsetZ == null) {
             return basePos;
         }
         float ox = def.compiledOffsetX.evaluate(time, progress);
@@ -116,17 +115,22 @@ public class CosmosTrailManager {
         return basePos.add(ox, oy, oz);
     }
 
-    // --- CLEANED RENDER LOOP ---
-
-    private static void renderTrailGeometry(BufferBuilder buffer, Matrix4f identity, List<Vec3> smoothHistory, Vec3 cameraPos, TrailDefinition trailDef, float time) {
+    private static void renderTrailGeometry(BufferBuilder buffer, Matrix4f identity, List<Vec3> smoothHistory, Vec3 cameraPos, TrailDefinition trailDef, float timeSeconds) {
         int size = smoothHistory.size();
+
+
+        float trailDurationSecs = trailDef.config.historySegments * 0.05f;
+
         for (int i = 0; i < size - 1; i++) {
             float v1 = 1.0F - ((float) i / size);
             float v2 = 1.0F - ((float) (i + 1) / size);
 
-            //  Apply Orbit Offsets
-            Vec3 curr = applyOrbitOffset(trailDef, smoothHistory.get(i), time, v1);
-            Vec3 next = applyOrbitOffset(trailDef, smoothHistory.get(i + 1), time, v2);
+            float time1 = timeSeconds - ((1.0F - v1) * trailDurationSecs);
+            float time2 = timeSeconds - ((1.0F - v2) * trailDurationSecs);
+
+
+            Vec3 curr = applyOrbitOffset(trailDef, smoothHistory.get(i), time1, v1);
+            Vec3 next = applyOrbitOffset(trailDef, smoothHistory.get(i + 1), time2, v2);
 
             Vector3f dir = new Vector3f((float) (next.x - curr.x), (float) (next.y - curr.y), (float) (next.z - curr.z));
             if (dir.lengthSquared() < 0.0001f) continue;
@@ -134,11 +138,10 @@ public class CosmosTrailManager {
 
             Vector3f toCam = new Vector3f((float) (cameraPos.x - curr.x), (float) (cameraPos.y - curr.y), (float) (cameraPos.z - curr.z)).normalize();
 
-            //  Evaluate Widths
-            float width1 = evaluateWidth(trailDef, time, v1);
-            float width2 = evaluateWidth(trailDef, time, v2);
 
-            //  Calculate Billboard Geometry
+            float width1 = evaluateWidth(trailDef, time1, v1);
+            float width2 = evaluateWidth(trailDef, time2, v2);
+
             Vector3f side1 = new Vector3f();
             dir.cross(toCam, side1);
             side1.normalize().mul(width1);
