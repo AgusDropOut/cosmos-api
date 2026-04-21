@@ -3,9 +3,9 @@
     "id": "fire",
     "type": "cosmos:trail_system",
     "config": {
-        "history_segments": 50,
+        "history_segments": 30,
         "width_curve": "1.0",
-        "orbit_offset": "vec3(0.000, 0.000, 0.000)",
+        "orbit_offset": "1.0",
         "material_id": "cosmos:fire"
     }
 }

@@ -4,10 +4,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import dev.cosmos.api.data.TrailDefinition;
 import dev.cosmos.impl.client.CosmosShaderManager;
-import dev.cosmos.impl.data.CosmosDataManager;
 import dev.cosmos.impl.data.handler.TrailDataHandler;
 import dev.cosmos.util.CosmosSplineHelper;
-import dev.cosmos.util.math.MathExpression;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
@@ -37,7 +35,7 @@ public class CosmosTrailManager {
     public static void renderAllAndClear() {
         if (ACTIVE_TRAILS.isEmpty()) return;
 
-        float time = (System.currentTimeMillis() % 100000L) ;
+        float time = (System.currentTimeMillis() % 100000L);
 
         Matrix4f currentProj = new Matrix4f(RenderSystem.getProjectionMatrix());
         PoseStack rsStack = RenderSystem.getModelViewStack();
@@ -63,14 +61,14 @@ public class CosmosTrailManager {
 
             RenderSystem.setShader(() -> shader);
             if (shader.getUniform("CosmosTime") != null) {
-                shader.getUniform("CosmosTime").set(time*0.001f);
+                shader.getUniform("CosmosTime").set(time * 0.001f);
             }
 
             CosmosRenderState.setup(trailDef.config.render_state);
 
             List<Vec3> smoothHistory = generateSmoothHistory(data.history);
             buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
-            renderTrailGeometry(buffer, IDENTITY, smoothHistory, data.cameraPos, trailDef.compiledWidth, time);
+            renderTrailGeometry(buffer, IDENTITY, smoothHistory, data.cameraPos, trailDef, time);
             tess.end();
 
             CosmosRenderState.restoreToBatchDefault();
@@ -94,31 +92,53 @@ public class CosmosTrailManager {
         int subdivisions = 4;
         for (int i = 1; i < points.size() - 2; i++) {
             for (int j = 0; j < subdivisions; j++) {
-                smooth.add(CosmosSplineHelper.catmullRom(points.get(i-1), points.get(i), points.get(i+1), points.get(i+2), (double) j / subdivisions));
+                smooth.add(CosmosSplineHelper.catmullRom(points.get(i - 1), points.get(i), points.get(i + 1), points.get(i + 2), (double) j / subdivisions));
             }
         }
         smooth.add(raw.get(raw.size() - 1));
         return smooth;
     }
 
-    private static void renderTrailGeometry(BufferBuilder buffer, Matrix4f identity, List<Vec3> smoothHistory, Vec3 cameraPos, MathExpression widthCurve, float time) {
+    // --- EXTRACTED EVALUATION METHODS ---
+
+    private static float evaluateWidth(TrailDefinition def, float time, float progress) {
+        if (def.compiledWidth == null) return 1.0f;
+        return def.compiledWidth.evaluate(time, progress);
+    }
+
+    private static Vec3 applyOrbitOffset(TrailDefinition def, Vec3 basePos, float time, float progress) {
+        if (def.config.orbitOffset == null || def.compiledOffsetY == null || def.compiledOffsetZ == null) {
+            return basePos;
+        }
+        float ox = def.compiledOffsetX.evaluate(time, progress);
+        float oy = def.compiledOffsetY.evaluate(time, progress);
+        float oz = def.compiledOffsetZ.evaluate(time, progress);
+        return basePos.add(ox, oy, oz);
+    }
+
+    // --- CLEANED RENDER LOOP ---
+
+    private static void renderTrailGeometry(BufferBuilder buffer, Matrix4f identity, List<Vec3> smoothHistory, Vec3 cameraPos, TrailDefinition trailDef, float time) {
         int size = smoothHistory.size();
         for (int i = 0; i < size - 1; i++) {
-            Vec3 curr = smoothHistory.get(i);
-            Vec3 next = smoothHistory.get(i + 1);
-
-            Vector3f dir = new Vector3f((float)(next.x - curr.x), (float)(next.y - curr.y), (float)(next.z - curr.z));
-            if (dir.lengthSquared() < 0.0001f) continue;
-            dir.normalize();
-
-            Vector3f toCam = new Vector3f((float)(cameraPos.x - curr.x), (float)(cameraPos.y - curr.y), (float)(cameraPos.z - curr.z)).normalize();
-
             float v1 = 1.0F - ((float) i / size);
             float v2 = 1.0F - ((float) (i + 1) / size);
 
-            float width1 = widthCurve.evaluate(time, v1);
-            float width2 = widthCurve.evaluate(time, v2);
+            //  Apply Orbit Offsets
+            Vec3 curr = applyOrbitOffset(trailDef, smoothHistory.get(i), time, v1);
+            Vec3 next = applyOrbitOffset(trailDef, smoothHistory.get(i + 1), time, v2);
 
+            Vector3f dir = new Vector3f((float) (next.x - curr.x), (float) (next.y - curr.y), (float) (next.z - curr.z));
+            if (dir.lengthSquared() < 0.0001f) continue;
+            dir.normalize();
+
+            Vector3f toCam = new Vector3f((float) (cameraPos.x - curr.x), (float) (cameraPos.y - curr.y), (float) (cameraPos.z - curr.z)).normalize();
+
+            //  Evaluate Widths
+            float width1 = evaluateWidth(trailDef, time, v1);
+            float width2 = evaluateWidth(trailDef, time, v2);
+
+            //  Calculate Billboard Geometry
             Vector3f side1 = new Vector3f();
             dir.cross(toCam, side1);
             side1.normalize().mul(width1);
@@ -148,6 +168,7 @@ public class CosmosTrailManager {
         ResourceLocation trailId;
         List<Vec3> history;
         Vec3 cameraPos;
+
         TrailData(ResourceLocation id, List<Vec3> h, Vec3 cam) {
             this.trailId = id;
             this.history = h;
