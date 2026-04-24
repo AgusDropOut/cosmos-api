@@ -1,6 +1,7 @@
 package dev.cosmos.impl.event;
 
 import dev.cosmos.Cosmos;
+import dev.cosmos.impl.client.render.CosmosBeamManager;
 import dev.cosmos.impl.client.render.CosmosTrailManager;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
@@ -14,6 +15,7 @@ public class CosmosRenderEvents {
     public static void onRenderLevelStage(RenderLevelStageEvent event) {
         if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_LEVEL) {
             CosmosTrailManager.renderAllAndClear();
+            CosmosBeamManager.renderAllAndClear();
         }
     }
 }

@@ -2,6 +2,7 @@ package dev.cosmos;
 
 import com.mojang.logging.LogUtils;
 import dev.cosmos.api.registry.CosmosDataRegistry;
+import dev.cosmos.impl.data.handler.BeamDataHandler;
 import dev.cosmos.impl.data.handler.TrailDataHandler;
 import dev.cosmos.init.ModEntityTypes;
 import dev.cosmos.init.ModItems;
@@ -39,6 +40,7 @@ public class Cosmos {
         CREATIVE_MODE_TABS.register(modEventBus);
 
         CosmosDataRegistry.register("cosmos:trail_system", new TrailDataHandler());
+        CosmosDataRegistry.register("cosmos:beam_system", new BeamDataHandler());
 
         modEventBus.addListener(this::commonSetup);
 
