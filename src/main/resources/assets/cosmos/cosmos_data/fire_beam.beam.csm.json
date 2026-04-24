@@ -1,0 +1,14 @@
+{
+    "namespace": "cosmos",
+    "id": "fire_beam",
+    "type": "cosmos:beam_system",
+    "config": {
+        "radial_segments": 8,
+        "length_segments": 40,
+        "radius_curve": "sin((time * 10.0))",
+        "offset_x": "0.0",
+        "offset_y": "0.0",
+        "offset_z": "0.0",
+        "material_id": "cosmos:fire_beam"
+    }
+}

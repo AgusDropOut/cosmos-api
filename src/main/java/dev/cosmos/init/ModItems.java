@@ -1,6 +1,7 @@
 package dev.cosmos.init;
 
 import dev.cosmos.Cosmos;
+import dev.cosmos.impl.test.CosmosBeamTestItem;
 import dev.cosmos.impl.test.CosmosTestItem;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -14,6 +15,9 @@ public class ModItems {
 
     public static final RegistryObject<Item> TEST_WAND = ITEMS.register("test_wand",
             () -> new CosmosTestItem(new Item.Properties()));
+    public static final RegistryObject<Item> TEST_BEAM = ITEMS.register("test_beam",
+            () -> new CosmosBeamTestItem(new Item.Properties()));
+
 
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);

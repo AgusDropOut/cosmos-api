@@ -19,12 +19,12 @@ public class CosmosBeamManager {
     private static final Matrix4f savedProjection = new Matrix4f();
     private static final Matrix4f savedModelView = new Matrix4f();
 
-    public static void submitBeam(ResourceLocation beamId, Vec3 start, Vec3 end, Matrix4f cameraMatrix) {
+    public static void submitBeam(ResourceLocation beamId, Vec3 start, Vec3 end, Vec3 cameraPos, Matrix4f cameraMatrix) {
         if (ACTIVE_BEAMS.isEmpty()) {
             savedProjection.set(RenderSystem.getProjectionMatrix());
             savedModelView.set(cameraMatrix);
         }
-        ACTIVE_BEAMS.add(new BeamData(beamId, start, end));
+        ACTIVE_BEAMS.add(new BeamData(beamId, start, end, cameraPos));
     }
 
     public static void renderAllAndClear() {
@@ -36,6 +36,7 @@ public class CosmosBeamManager {
         PoseStack rsStack = RenderSystem.getModelViewStack();
         rsStack.pushPose();
 
+        // Apply the saved Pure Camera Matrices
         RenderSystem.setProjectionMatrix(savedProjection, VertexSorting.DISTANCE_TO_ORIGIN);
         rsStack.setIdentity();
         rsStack.mulPoseMatrix(savedModelView);
@@ -62,7 +63,7 @@ public class CosmosBeamManager {
             CosmosRenderState.setup(def.config.render_state);
 
             buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
-            renderBeamGeometry(buffer, IDENTITY, data.start, data.end, def, timeSeconds);
+            renderBeamGeometry(buffer, IDENTITY, data.start, data.end, data.cameraPos, def, timeSeconds);
             tess.end();
 
             CosmosRenderState.restoreToBatchDefault();
@@ -76,9 +77,18 @@ public class CosmosBeamManager {
         ACTIVE_BEAMS.clear();
     }
 
-    private static void renderBeamGeometry(BufferBuilder buffer, Matrix4f matrix, Vec3 startVec, Vec3 endVec, BeamDefinition def, float time) {
-        Vector3f start = new Vector3f((float) startVec.x, (float) startVec.y, (float) startVec.z);
-        Vector3f end = new Vector3f((float) endVec.x, (float) endVec.y, (float) endVec.z);
+    private static void renderBeamGeometry(BufferBuilder buffer, Matrix4f matrix, Vec3 startVec, Vec3 endVec, Vec3 cameraPos, BeamDefinition def, float time) {
+        // Shift absolute world coordinates to be relative to the camera
+        Vector3f start = new Vector3f(
+                (float) (startVec.x - cameraPos.x),
+                (float) (startVec.y - cameraPos.y),
+                (float) (startVec.z - cameraPos.z)
+        );
+        Vector3f end = new Vector3f(
+                (float) (endVec.x - cameraPos.x),
+                (float) (endVec.y - cameraPos.y),
+                (float) (endVec.z - cameraPos.z)
+        );
 
         Vector3f dir = new Vector3f(end).sub(start);
         float length = dir.length();
@@ -95,7 +105,6 @@ public class CosmosBeamManager {
         int radSegs = Math.max(3, def.config.radialSegments);
 
         Vector3f[][] rings = new Vector3f[lenSegs + 1][radSegs + 1];
-        //  Declared as a 3D array to hold the [U, V] pairs
         float[][][] uvs = new float[lenSegs + 1][radSegs + 1][2];
 
         //  Calculate Vertices
@@ -103,7 +112,7 @@ public class CosmosBeamManager {
             float v = (float) i / lenSegs;
             Vector3f center = new Vector3f(start).lerp(end, v);
 
-            // AST Evaluation!
+            // AST Evaluation
             float r = def.compiledRadius.evaluate(time, v);
             float dx = def.compiledOffsetX.evaluate(time, v);
             float dy = def.compiledOffsetY.evaluate(time, v);
@@ -136,7 +145,6 @@ public class CosmosBeamManager {
                 Vector3f p3 = rings[i + 1][j + 1];
                 Vector3f p4 = rings[i][j + 1];
 
-
                 buffer.vertex(matrix, p1.x(), p1.y(), p1.z()).color(1f, 1f, 1f, 1f).uv(uvs[i][j][0], uvs[i][j][1]).endVertex();
                 buffer.vertex(matrix, p2.x(), p2.y(), p2.z()).color(1f, 1f, 1f, 1f).uv(uvs[i + 1][j][0], uvs[i + 1][j][1]).endVertex();
                 buffer.vertex(matrix, p3.x(), p3.y(), p3.z()).color(1f, 1f, 1f, 1f).uv(uvs[i + 1][j + 1][0], uvs[i + 1][j + 1][1]).endVertex();
@@ -149,11 +157,13 @@ public class CosmosBeamManager {
         ResourceLocation beamId;
         Vec3 start;
         Vec3 end;
+        Vec3 cameraPos;
 
-        BeamData(ResourceLocation id, Vec3 start, Vec3 end) {
+        BeamData(ResourceLocation id, Vec3 start, Vec3 end, Vec3 cameraPos) {
             this.beamId = id;
             this.start = start;
             this.end = end;
+            this.cameraPos = cameraPos;
         }
     }
 }

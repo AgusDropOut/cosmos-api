@@ -1,6 +1,7 @@
 package dev.cosmos.impl.client;
 
 import dev.cosmos.Cosmos;
+import dev.cosmos.impl.client.render.CosmosBeamEntityRenderer;
 import dev.cosmos.impl.data.CosmosDataManager;
 import dev.cosmos.init.ModEntityTypes;
 import dev.cosmos.impl.test.CosmosTestProjectileRenderer;
@@ -16,6 +17,8 @@ public class CosmosClientSetup {
     @SubscribeEvent
     public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntityTypes.TEST_PROJECTILE.get(), CosmosTestProjectileRenderer::new);
+        event.registerEntityRenderer(ModEntityTypes.BEAM_ENTITY.get(), CosmosBeamEntityRenderer::new);
+
     }
 
     @SubscribeEvent
