@@ -55,7 +55,9 @@ public class CosmosTrailManager {
 
         for (TrailData data : ACTIVE_TRAILS) {
             TrailDefinition trailDef = TrailDataHandler.TRAILS.get(data.trailId);
+
             if (trailDef == null) continue;
+
 
             ShaderInstance shader = CosmosShaderManager.SHADERS.get(new ResourceLocation(trailDef.config.materialId));
             if (shader == null) continue;

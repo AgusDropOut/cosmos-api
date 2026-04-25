@@ -1,6 +1,6 @@
 package dev.cosmos.impl.test;
 
-import dev.cosmos.impl.entity.CosmosBeamEntity;
+
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;

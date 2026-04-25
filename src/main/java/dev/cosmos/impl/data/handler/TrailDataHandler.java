@@ -24,7 +24,6 @@ public class TrailDataHandler implements ICosmosDataHandler {
     public void handle(ResourceLocation resourceId, JsonObject json, Gson gson) {
         TrailDefinition trailDef = gson.fromJson(json, TrailDefinition.class);
         trailDef.compileExpressions();
-
         TRAILS.put(resourceId, trailDef);
         Cosmos.LOGGER.info("Cosmos API: Loaded Trail [{}]", resourceId);
     }

@@ -1,7 +1,8 @@
 package dev.cosmos.init;
 
 import dev.cosmos.Cosmos;
-import dev.cosmos.impl.entity.CosmosBeamEntity;
+
+import dev.cosmos.impl.test.CosmosBeamEntity;
 import dev.cosmos.impl.test.CosmosTestProjectile;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;

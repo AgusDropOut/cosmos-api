@@ -1,43 +1,38 @@
 package dev.cosmos.impl.test;
 
+import dev.cosmos.api.entity.AbstractCosmosTrailProjectile;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.network.NetworkHooks;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
 
-public class CosmosTestProjectile extends ThrowableProjectile {
+public class CosmosTestProjectile extends AbstractCosmosTrailProjectile {
 
-    public final Deque<Vec3> history = new ArrayDeque<>();
-    public final int maxHistory = 50;
+    public CosmosTestProjectile(EntityType<? extends CosmosTestProjectile> type, Level level) {
 
-    public CosmosTestProjectile(EntityType<? extends ThrowableProjectile> type, Level level) {
-        super(type, level);
+        super(type, level, new ResourceLocation("cosmos", "fire"), 50);
     }
 
     @Override
-    protected void defineSynchedData() {}
-
+    protected void defineSynchedData() {
+    }
 
     @Override
-    protected void onHit(HitResult p_37260_) {
+    protected void onHit(HitResult result) {
         this.discard();
     }
 
     @Override
-    public void tick() {
-        super.tick();
-
-
-
-        if (this.level().isClientSide) {
-            this.history.addFirst(this.position());
-            if (this.history.size() > maxHistory) {
-                this.history.removeLast();
-            }
-        }
+    public Packet<ClientGamePacketListener> getAddEntityPacket() {
+        return NetworkHooks.getEntitySpawningPacket(this);
     }
+
 }

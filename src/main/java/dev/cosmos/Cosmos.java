@@ -1,12 +1,14 @@
 package dev.cosmos;
 
 import com.mojang.logging.LogUtils;
+import dev.cosmos.api.CosmosAPI;
 import dev.cosmos.api.registry.CosmosDataRegistry;
 import dev.cosmos.impl.data.handler.BeamDataHandler;
 import dev.cosmos.impl.data.handler.TrailDataHandler;
 import dev.cosmos.init.ModEntityTypes;
 import dev.cosmos.init.ModItems;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -23,6 +25,8 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
+
+import java.util.function.Supplier;
 
 @Mod(Cosmos.MODID)
 public class Cosmos {
@@ -42,9 +46,18 @@ public class Cosmos {
         CosmosDataRegistry.register("cosmos:trail_system", new TrailDataHandler());
         CosmosDataRegistry.register("cosmos:beam_system", new BeamDataHandler());
 
+
+
+
+
         modEventBus.addListener(this::commonSetup);
 
+        CosmosAPI.registerBeamEntity(ModEntityTypes.BEAM_ENTITY);
+        CosmosAPI.registerTrailEntity(ModEntityTypes.TEST_PROJECTILE);
+
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, CosmosConfig.SPEC, "cosmos-common.toml");
+
+
 
         MinecraftForge.EVENT_BUS.register(this);
     }
@@ -58,6 +71,7 @@ public class Cosmos {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
             LOGGER.info("Cosmos API: Initializing client setup.");
+
         }
     }
 }
