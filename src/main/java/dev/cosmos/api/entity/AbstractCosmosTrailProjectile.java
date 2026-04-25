@@ -9,11 +9,10 @@ public abstract class AbstractCosmosTrailProjectile extends ThrowableProjectile 
 
     private final CosmosTrailState trailState;
 
-    public AbstractCosmosTrailProjectile(EntityType<? extends ThrowableProjectile> type, Level level, ResourceLocation trailId, int maxHistory) {
+    public AbstractCosmosTrailProjectile(EntityType<? extends ThrowableProjectile> type, Level level, CosmosTrailState trailState) {
         super(type, level);
-        this.trailState = new CosmosTrailState(trailId, maxHistory);
+        this.trailState = trailState;
     }
-
     @Override
     public CosmosTrailState getTrailState() {
         return this.trailState;

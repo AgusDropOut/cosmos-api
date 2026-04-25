@@ -1,6 +1,7 @@
 package dev.cosmos.impl.test;
 
 import dev.cosmos.api.entity.AbstractCosmosTrailProjectile;
+import dev.cosmos.api.entity.CosmosTrailState;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.resources.ResourceLocation;
@@ -17,8 +18,12 @@ import java.util.Deque;
 public class CosmosTestProjectile extends AbstractCosmosTrailProjectile {
 
     public CosmosTestProjectile(EntityType<? extends CosmosTestProjectile> type, Level level) {
-
-        super(type, level, new ResourceLocation("cosmos", "fire"), 50);
+        // Look at this beautiful fluent API!
+        super(type, level, CosmosTrailState.builder()
+                .setMaxHistory(50)
+                .addTrail(new ResourceLocation("cosmos", "fire")) // Core fire
+                .build()
+        );
     }
 
     @Override

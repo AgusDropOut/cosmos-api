@@ -57,8 +57,11 @@ public class CosmosTrailRenderer<T extends Entity & ICosmosTrail> extends Entity
         viewStack.translate(-relX, -relY, -relZ);
         Matrix4f pureCameraMatrix = viewStack.last().pose();
 
-        // Submit
         CosmosTrailManager.submitTrail(state.getTrailId(), rawHistory, cameraPos, pureCameraMatrix);
+
+        for (ResourceLocation trailId : state.getTrailIds()) {
+            CosmosTrailManager.submitTrail(trailId, rawHistory, cameraPos, pureCameraMatrix);
+        }
 
         super.render(entity, entityYaw, partialTicks, poseStack, bufferSource, packedLight);
     }

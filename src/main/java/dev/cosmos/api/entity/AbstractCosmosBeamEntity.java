@@ -10,9 +10,9 @@ public abstract class AbstractCosmosBeamEntity extends Entity implements ICosmos
 
     private final CosmosBeamState beamState;
 
-    public AbstractCosmosBeamEntity(EntityType<?> type, Level level, ResourceLocation beamId) {
+    public AbstractCosmosBeamEntity(EntityType<?> type, Level level, CosmosBeamState beamState) {
         super(type, level);
-        this.beamState = new CosmosBeamState(beamId);
+        this.beamState = beamState;
     }
 
     @Override

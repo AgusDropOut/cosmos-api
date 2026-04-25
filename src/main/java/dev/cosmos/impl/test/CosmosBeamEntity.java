@@ -1,6 +1,7 @@
 package dev.cosmos.impl.test; // Moved to test package since it's an implementation
 
 import dev.cosmos.api.entity.AbstractCosmosBeamEntity;
+import dev.cosmos.api.entity.CosmosBeamState;
 import dev.cosmos.init.ModEntityTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -27,11 +28,11 @@ public class CosmosBeamEntity extends AbstractCosmosBeamEntity {
     private static final EntityDataAccessor<Float> END_Z = SynchedEntityData.defineId(CosmosBeamEntity.class, EntityDataSerializers.FLOAT);
 
     public CosmosBeamEntity(EntityType<?> type, Level level) {
-        super(type, level, new ResourceLocation("cosmos", "fire_beam")); // Hardcoded for test
+        super(type, level, null); // Hardcoded for test
     }
 
     public CosmosBeamEntity(Level level, LivingEntity owner, ResourceLocation beamId) {
-        super(ModEntityTypes.BEAM_ENTITY.get(), level, beamId);
+        super(ModEntityTypes.BEAM_ENTITY.get(), level, CosmosBeamState.builder().addBeam(new ResourceLocation("cosmos","fire_beam")).setLerpFactor(0.5f).build());
         this.entityData.set(OWNER_UUID, Optional.of(owner.getUUID()));
         this.setPos(owner.getX(), owner.getEyeY(), owner.getZ());
     }

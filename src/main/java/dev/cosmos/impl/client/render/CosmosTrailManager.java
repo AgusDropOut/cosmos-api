@@ -49,6 +49,8 @@ public class CosmosTrailManager {
 
         CosmosRenderState.beginBatch();
 
+
+
         Tesselator tess = Tesselator.getInstance();
         BufferBuilder buffer = tess.getBuilder();
         Matrix4f IDENTITY = new Matrix4f();
@@ -68,6 +70,8 @@ public class CosmosTrailManager {
             }
 
             CosmosRenderState.setup(trailDef.config.render_state);
+
+            //RenderSystem.setShaderTexture(0, net.minecraft.world.inventory.InventoryMenu.BLOCK_ATLAS);
 
             List<Vec3> smoothHistory = generateSmoothHistory(data.history);
             buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
