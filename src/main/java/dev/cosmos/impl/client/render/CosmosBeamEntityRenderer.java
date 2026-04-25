@@ -21,27 +21,41 @@ public class CosmosBeamEntityRenderer extends EntityRenderer<CosmosBeamEntity> {
     public void render(CosmosBeamEntity entity, float entityYaw, float partialTick, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
         Vec3 cameraPos = this.entityRenderDispatcher.camera.getPosition();
 
-        // Calculate exact interpolated position
-        double lerpX = Mth.lerp(partialTick, entity.xo, entity.getX());
-        double lerpY = Mth.lerp(partialTick, entity.yo, entity.getY());
-        double lerpZ = Mth.lerp(partialTick, entity.zo, entity.getZ());
 
-        // Calculate relative distance from camera
-        float relX = (float) (lerpX - cameraPos.x());
-        float relY = (float) (lerpY - cameraPos.y());
-        float relZ = (float) (lerpZ - cameraPos.z());
+        double startX = Mth.lerp(partialTick, entity.xo, entity.getX());
+        double startY = Mth.lerp(partialTick, entity.yo, entity.getY());
+        double startZ = Mth.lerp(partialTick, entity.zo, entity.getZ());
+        Vec3 finalStart = new Vec3(startX, startY, startZ);
 
-        // 3Extract the Pure Camera Matrix
+        // MODULAR ENDPOINT LERPING STRATEGY
+        boolean enableEndpointLerp = true;
+        Vec3 finalEndpoint;
+
+        if (enableEndpointLerp && !entity.clientPreviousEndpoint.equals(Vec3.ZERO)) {
+            double endX = Mth.lerp(partialTick, entity.clientPreviousEndpoint.x, entity.clientCurrentEndpoint.x);
+            double endY = Mth.lerp(partialTick, entity.clientPreviousEndpoint.y, entity.clientCurrentEndpoint.y);
+            double endZ = Mth.lerp(partialTick, entity.clientPreviousEndpoint.z, entity.clientCurrentEndpoint.z);
+            finalEndpoint = new Vec3(endX, endY, endZ);
+        } else {
+            // Fallback to raw snapped server data
+            finalEndpoint = entity.getEndPoint();
+        }
+
+
+        float relX = (float) (startX - cameraPos.x());
+        float relY = (float) (startY - cameraPos.y());
+        float relZ = (float) (startZ - cameraPos.z());
+
         PoseStack viewStack = new PoseStack();
         viewStack.last().pose().set(poseStack.last().pose());
         viewStack.translate(-relX, -relY, -relZ);
         Matrix4f pureCameraMatrix = viewStack.last().pose();
 
-        //  Submit to Manager
+
         CosmosBeamManager.submitBeam(
                 entity.getBeamId(),
-                entity.position(),
-                entity.getEndPoint(),
+                finalStart,
+                finalEndpoint,
                 cameraPos,
                 pureCameraMatrix
         );

@@ -48,13 +48,15 @@ public class CosmosBeamEntity extends Entity {
         this.entityData.define(BEAM_ID, "cosmos:fire_beam");
     }
 
+    public Vec3 clientPreviousEndpoint = Vec3.ZERO;
+    public Vec3 clientCurrentEndpoint = Vec3.ZERO;
+
     @Override
     public void tick() {
         super.tick();
 
         LivingEntity owner = getOwner();
 
-        // If the owner logged off, died, or stopped using the item, kill the beam
         if (owner == null || !owner.isAlive() || !owner.isUsingItem()) {
             if (!this.level().isClientSide) {
                 this.discard();
@@ -62,19 +64,29 @@ public class CosmosBeamEntity extends Entity {
             return;
         }
 
-        // Stick the start of the beam to the player's shoulder/eye
         this.setPos(owner.getX(), owner.getEyeY() - 0.2, owner.getZ());
 
-        // Perform the raycast to find the end point
+        // --- SERVER SIDE (Raycast) ---
         if (!this.level().isClientSide) {
-            HitResult hit = owner.pick(30.0D, 1.0f, false);
+            net.minecraft.world.phys.HitResult hit = owner.pick(30.0D, 1.0f, false);
             Vec3 end = hit.getLocation();
 
             this.entityData.set(END_X, (float) end.x);
             this.entityData.set(END_Y, (float) end.y);
             this.entityData.set(END_Z, (float) end.z);
+        }
+        // --- CLIENT SIDE (Lerp Tracking) ---
+        else {
+            Vec3 syncedTarget = this.getEndPoint();
 
-            // TODO: Here is where you deal damage to entities caught in the raycast
+            if (this.clientPreviousEndpoint.equals(Vec3.ZERO)) {
+                this.clientPreviousEndpoint = syncedTarget;
+                this.clientCurrentEndpoint = syncedTarget;
+            } else {
+
+                this.clientPreviousEndpoint = this.clientCurrentEndpoint;
+                this.clientCurrentEndpoint = this.clientCurrentEndpoint.lerp(syncedTarget, 0.5);
+            }
         }
     }
 

@@ -137,7 +137,7 @@ public class CosmosBeamManager {
             }
         }
 
-        //  Draw Quads
+
         for (int i = 0; i < lenSegs; i++) {
             for (int j = 0; j < radSegs; j++) {
                 Vector3f p1 = rings[i][j];
