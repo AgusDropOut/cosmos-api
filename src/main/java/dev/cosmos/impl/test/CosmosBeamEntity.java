@@ -28,14 +28,15 @@ public class CosmosBeamEntity extends AbstractCosmosBeamEntity {
     private static final EntityDataAccessor<Float> END_Z = SynchedEntityData.defineId(CosmosBeamEntity.class, EntityDataSerializers.FLOAT);
 
     public CosmosBeamEntity(EntityType<?> type, Level level) {
-        super(type, level, null); // Hardcoded for test
+        super(type, level);
     }
 
-    public CosmosBeamEntity(Level level, LivingEntity owner, ResourceLocation beamId) {
-        super(ModEntityTypes.BEAM_ENTITY.get(), level, CosmosBeamState.builder().addBeam(new ResourceLocation("cosmos","fire_beam")).setLerpFactor(0.5f).build());
+    public CosmosBeamEntity(EntityType type, Level level, LivingEntity owner) {
+        super(type,level);
         this.entityData.set(OWNER_UUID, Optional.of(owner.getUUID()));
         this.setPos(owner.getX(), owner.getEyeY(), owner.getZ());
     }
+
 
     @Override
     protected void defineSynchedData() {
@@ -45,7 +46,7 @@ public class CosmosBeamEntity extends AbstractCosmosBeamEntity {
         this.entityData.define(END_Z, 0f);
     }
 
-    // Required by the Abstract class!
+
     @Override
     public Vec3 getTargetPosition() {
         return new Vec3(this.entityData.get(END_X), this.entityData.get(END_Y), this.entityData.get(END_Z));
@@ -70,6 +71,14 @@ public class CosmosBeamEntity extends AbstractCosmosBeamEntity {
             this.entityData.set(END_Y, (float) end.y);
             this.entityData.set(END_Z, (float) end.z);
         }
+    }
+
+    @Override
+    protected CosmosBeamState createDefaultState() {
+        return CosmosBeamState.builder()
+                .addBeam(new ResourceLocation("cosmos", "fire_beam"))
+                .setLerpFactor(0.5f)
+                .build();
     }
 
     private LivingEntity getOwner() {

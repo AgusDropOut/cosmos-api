@@ -1,6 +1,7 @@
 package dev.cosmos.impl.test;
 
 
+import dev.cosmos.init.ModEntityTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -26,7 +27,7 @@ public class CosmosBeamTestItem extends Item {
 
         if (!level.isClientSide) {
 
-            CosmosBeamEntity beam = new CosmosBeamEntity(level, player, new ResourceLocation("cosmos", "fire_beam"));
+            CosmosBeamEntity beam = new CosmosBeamEntity(ModEntityTypes.BEAM_ENTITY.get(),level, player);
             level.addFreshEntity(beam);
         }
 

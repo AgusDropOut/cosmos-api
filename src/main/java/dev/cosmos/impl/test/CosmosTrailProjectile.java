@@ -6,25 +6,24 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.NetworkHooks;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
+public class CosmosTrailProjectile extends AbstractCosmosTrailProjectile {
 
-public class CosmosTestProjectile extends AbstractCosmosTrailProjectile {
+    public CosmosTrailProjectile(EntityType<? extends CosmosTrailProjectile> type, Level level) {
+        super(type, level);
+    }
 
-    public CosmosTestProjectile(EntityType<? extends CosmosTestProjectile> type, Level level) {
-        // Look at this beautiful fluent API!
-        super(type, level, CosmosTrailState.builder()
+    @Override
+    protected CosmosTrailState createDefaultState() {
+        return CosmosTrailState.builder()
                 .setMaxHistory(50)
                 .addTrail(new ResourceLocation("cosmos", "fire")) // Core fire
-                .build()
-        );
+                .build();
     }
+
 
     @Override
     protected void defineSynchedData() {

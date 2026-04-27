@@ -3,7 +3,7 @@ package dev.cosmos.init;
 import dev.cosmos.Cosmos;
 
 import dev.cosmos.impl.test.CosmosBeamEntity;
-import dev.cosmos.impl.test.CosmosTestProjectile;
+import dev.cosmos.impl.test.CosmosTrailProjectile;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -15,9 +15,9 @@ public class ModEntityTypes {
     public static final DeferredRegister<EntityType<?>> ENTITY_TYPES =
             DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, Cosmos.MODID);
 
-    public static final RegistryObject<EntityType<CosmosTestProjectile>> TEST_PROJECTILE =
+    public static final RegistryObject<EntityType<CosmosTrailProjectile>> TEST_PROJECTILE =
             ENTITY_TYPES.register("test_projectile",
-                    () -> EntityType.Builder.<CosmosTestProjectile>of(CosmosTestProjectile::new, MobCategory.MISC)
+                    () -> EntityType.Builder.<CosmosTrailProjectile>of(CosmosTrailProjectile::new, MobCategory.MISC)
                             .sized(0.25f, 0.25f)
                             .clientTrackingRange(4)
                             .updateInterval(10)

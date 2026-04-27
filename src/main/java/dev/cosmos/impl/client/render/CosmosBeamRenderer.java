@@ -24,7 +24,7 @@ public class CosmosBeamRenderer<T extends Entity & ICosmosBeam> extends EntityRe
     public void render(T entity, float entityYaw, float partialTick, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
         Vec3 cameraPos = this.entityRenderDispatcher.camera.getPosition();
 
-        //  Grab the state from the interface
+
         CosmosBeamState state = entity.getBeamState();
 
         double startX = Mth.lerp(partialTick, entity.xo, entity.getX());

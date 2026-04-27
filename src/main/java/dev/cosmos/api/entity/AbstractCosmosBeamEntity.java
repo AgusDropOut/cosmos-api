@@ -8,11 +8,11 @@ import net.minecraft.world.phys.Vec3;
 
 public abstract class AbstractCosmosBeamEntity extends Entity implements ICosmosBeam {
 
-    private final CosmosBeamState beamState;
+    private CosmosBeamState beamState;
 
-    public AbstractCosmosBeamEntity(EntityType<?> type, Level level, CosmosBeamState beamState) {
+    public AbstractCosmosBeamEntity(EntityType<?> type, Level level) {
         super(type, level);
-        this.beamState = beamState;
+        this.beamState = this.createDefaultState();
     }
 
     @Override
@@ -20,13 +20,17 @@ public abstract class AbstractCosmosBeamEntity extends Entity implements ICosmos
         return this.beamState;
     }
 
+
     @Override
     public void tick() {
         super.tick();
-        if (this.level().isClientSide) {
+        if (this.level().isClientSide && this.beamState != null) {
             this.beamState.tickLerp(this.getTargetPosition());
         }
     }
+
+    protected abstract CosmosBeamState createDefaultState();
+
 
 
     public abstract Vec3 getTargetPosition();
