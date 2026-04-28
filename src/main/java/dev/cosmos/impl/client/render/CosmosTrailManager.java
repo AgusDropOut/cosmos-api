@@ -3,6 +3,7 @@ package dev.cosmos.impl.client.render;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import dev.cosmos.api.data.TrailDefinition;
+import dev.cosmos.api.material.CosmosMaterialInstance;
 import dev.cosmos.impl.client.CosmosShaderManager;
 import dev.cosmos.impl.data.handler.TrailDataHandler;
 import dev.cosmos.util.CosmosSplineHelper;
@@ -21,7 +22,7 @@ public class CosmosTrailManager {
     private static final Matrix4f savedProjection = new Matrix4f();
     private static final Matrix4f savedModelView = new Matrix4f();
 
-    public static void submitTrail(ResourceLocation trailId, List<Vec3> history, Vec3 cameraPos, Matrix4f cameraMatrix) {
+    public static void submitTrail(ResourceLocation trailId, CosmosMaterialInstance material, List<Vec3> history, Vec3 cameraPos, Matrix4f cameraMatrix) {
         if (history.size() < 2) return;
 
         if (ACTIVE_TRAILS.isEmpty()) {
@@ -29,7 +30,7 @@ public class CosmosTrailManager {
             savedModelView.set(cameraMatrix);
         }
 
-        ACTIVE_TRAILS.add(new TrailData(trailId, new ArrayList<>(history), cameraPos));
+        ACTIVE_TRAILS.add(new TrailData(trailId, material, new ArrayList<>(history), cameraPos));
     }
 
     public static void renderAllAndClear() {
@@ -61,13 +62,15 @@ public class CosmosTrailManager {
             if (trailDef == null) continue;
 
 
-            ShaderInstance shader = CosmosShaderManager.SHADERS.get(new ResourceLocation(trailDef.config.materialId));
+            ShaderInstance shader = CosmosShaderManager.SHADERS.get(data.material.getMaterialId());
             if (shader == null) continue;
 
             RenderSystem.setShader(() -> shader);
             if (shader.getUniform("CosmosTime") != null) {
                 shader.getUniform("CosmosTime").set(timeSeconds); // Pass seconds
             }
+
+            data.material.applyTo(shader);
 
             CosmosRenderState.setup(trailDef.config.render_state);
 
@@ -175,11 +178,13 @@ public class CosmosTrailManager {
 
     private static class TrailData {
         ResourceLocation trailId;
+        CosmosMaterialInstance material;
         List<Vec3> history;
         Vec3 cameraPos;
 
-        TrailData(ResourceLocation id, List<Vec3> h, Vec3 cam) {
+        TrailData(ResourceLocation id, CosmosMaterialInstance material, List<Vec3> h, Vec3 cam) {
             this.trailId = id;
+            this.material = material;
             this.history = h;
             this.cameraPos = cam;
         }

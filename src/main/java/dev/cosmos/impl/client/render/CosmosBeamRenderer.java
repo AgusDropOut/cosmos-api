@@ -52,8 +52,8 @@ public class CosmosBeamRenderer<T extends Entity & ICosmosBeam> extends EntityRe
         Matrix4f pureCameraMatrix = viewStack.last().pose();
 
         //  Submit
-        for(ResourceLocation id : state.getBeamIds()) {
-            CosmosBeamManager.submitBeam(id, finalStart, finalEndpoint, cameraPos, pureCameraMatrix);
+        for(CosmosBeamState.BeamLayer layer : state.getLayers()) {
+            CosmosBeamManager.submitBeam(layer.beamId, layer.material, finalStart, finalEndpoint, cameraPos, pureCameraMatrix);
         }
 
         super.render(entity, entityYaw, partialTick, poseStack, buffer, packedLight);

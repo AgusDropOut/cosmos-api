@@ -9,7 +9,7 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity; // THE FIX IS HERE!
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 
@@ -58,8 +58,8 @@ public class CosmosTrailRenderer<T extends Entity & ICosmosTrail> extends Entity
         Matrix4f pureCameraMatrix = viewStack.last().pose();
 
 
-        for (ResourceLocation trailId : state.getTrailIds()) {
-            CosmosTrailManager.submitTrail(trailId, rawHistory, cameraPos, pureCameraMatrix);
+        for (CosmosTrailState.TrailLayer layer : state.getLayers()) {
+            CosmosTrailManager.submitTrail(layer.trailId, layer.material, rawHistory, cameraPos, pureCameraMatrix);
         }
 
         super.render(entity, entityYaw, partialTicks, poseStack, bufferSource, packedLight);

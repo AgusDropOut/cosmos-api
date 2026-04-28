@@ -3,6 +3,7 @@ package dev.cosmos.impl.client.render;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import dev.cosmos.api.data.BeamDefinition;
+import dev.cosmos.api.material.CosmosMaterialInstance;
 import dev.cosmos.impl.client.CosmosShaderManager;
 import dev.cosmos.impl.data.handler.BeamDataHandler;
 import net.minecraft.client.renderer.ShaderInstance;
@@ -19,12 +20,12 @@ public class CosmosBeamManager {
     private static final Matrix4f savedProjection = new Matrix4f();
     private static final Matrix4f savedModelView = new Matrix4f();
 
-    public static void submitBeam(ResourceLocation beamId, Vec3 start, Vec3 end, Vec3 cameraPos, Matrix4f cameraMatrix) {
+    public static void submitBeam(ResourceLocation beamId, CosmosMaterialInstance material, Vec3 start, Vec3 end, Vec3 cameraPos, Matrix4f cameraMatrix) {
         if (ACTIVE_BEAMS.isEmpty()) {
             savedProjection.set(RenderSystem.getProjectionMatrix());
             savedModelView.set(cameraMatrix);
         }
-        ACTIVE_BEAMS.add(new BeamData(beamId, start, end, cameraPos));
+        ACTIVE_BEAMS.add(new BeamData(beamId, material, start, end, cameraPos));
     }
 
     public static void renderAllAndClear() {
@@ -52,13 +53,15 @@ public class CosmosBeamManager {
             BeamDefinition def = BeamDataHandler.BEAMS.get(data.beamId);
             if (def == null) continue;
 
-            ShaderInstance shader = CosmosShaderManager.SHADERS.get(new ResourceLocation(def.config.materialId));
+            ShaderInstance shader = CosmosShaderManager.SHADERS.get(data.material.getMaterialId());
             if (shader == null) continue;
 
             RenderSystem.setShader(() -> shader);
             if (shader.getUniform("CosmosTime") != null) {
                 shader.getUniform("CosmosTime").set(timeSeconds);
             }
+
+            data.material.applyTo(shader);
 
             CosmosRenderState.setup(def.config.render_state);
 
@@ -155,12 +158,14 @@ public class CosmosBeamManager {
 
     private static class BeamData {
         ResourceLocation beamId;
+        CosmosMaterialInstance material;
         Vec3 start;
         Vec3 end;
         Vec3 cameraPos;
 
-        BeamData(ResourceLocation id, Vec3 start, Vec3 end, Vec3 cameraPos) {
+        BeamData(ResourceLocation id, CosmosMaterialInstance material, Vec3 start, Vec3 end, Vec3 cameraPos) {
             this.beamId = id;
+            this.material = material;
             this.start = start;
             this.end = end;
             this.cameraPos = cameraPos;

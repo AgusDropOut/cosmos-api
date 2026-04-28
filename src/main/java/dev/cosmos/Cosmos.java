@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import dev.cosmos.api.CosmosAPI;
 import dev.cosmos.api.registry.CosmosDataRegistry;
 import dev.cosmos.impl.data.handler.BeamDataHandler;
+import dev.cosmos.impl.data.handler.MaterialDataHandler;
 import dev.cosmos.impl.data.handler.TrailDataHandler;
 import dev.cosmos.init.ModEntityTypes;
 import dev.cosmos.init.ModItems;
@@ -45,6 +46,7 @@ public class Cosmos {
 
         CosmosDataRegistry.register("cosmos:trail_system", new TrailDataHandler());
         CosmosDataRegistry.register("cosmos:beam_system", new BeamDataHandler());
+        CosmosDataRegistry.register("cosmos:material", new MaterialDataHandler());
 
 
 

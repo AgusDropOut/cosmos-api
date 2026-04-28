@@ -4,10 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import dev.cosmos.Cosmos;
+import dev.cosmos.api.material.UniformType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceProvider;
@@ -33,7 +33,7 @@ public class CosmosShaderManager {
     @SubscribeEvent
     public static void onRegisterShaders(RegisterShadersEvent event) {
 
-        System.out.println("Registering Cosmos Shaders...");
+        Cosmos.LOGGER.info("Registering Cosmos Shaders...");
         SHADERS.clear();
         ResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
 
@@ -52,7 +52,7 @@ public class CosmosShaderManager {
                 String namespace = json.get("namespace").getAsString();
                 String id = json.get("id").getAsString();
                 ResourceLocation shaderLocation = new ResourceLocation(namespace, id);
-                ResourceProvider virtualProvider = createVirtualShaderProvider(event.getResourceProvider(), namespace, id);
+                ResourceProvider virtualProvider = createVirtualShaderProvider(event.getResourceProvider(), namespace, id, json);
 
                 System.out.println("Registering Cosmos Shader: " + shaderLocation);
 
@@ -71,10 +71,11 @@ public class CosmosShaderManager {
         }
     }
 
-    private static ResourceProvider createVirtualShaderProvider(ResourceProvider fallback, String namespace, String shaderId) {
+    private static ResourceProvider createVirtualShaderProvider(ResourceProvider fallback, String namespace, String shaderId, JsonObject json) {
         return location -> {
             if (location.getPath().endsWith(".json") && location.getPath().startsWith("shaders/core/")) {
                 String fullShaderPath = namespace + ":" + shaderId;
+                String uniformsJson = getExposedParameters(json).toString();
 
 
                 String dummyJson = """
@@ -89,16 +90,48 @@ public class CosmosShaderManager {
                     "attributes": ["Position", "Color", "UV0"],
                     "samplers": [{"name": "Sampler0"}],
                     "uniforms": [
-                        { "name": "ModelViewMat", "type": "matrix4x4", "count": 16, "values": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ] },
-                        { "name": "ProjMat", "type": "matrix4x4", "count": 16, "values": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ] },
-                        { "name": "CosmosTime", "type": "float", "count": 1, "values": [ 0.0 ] }
+                        %s
                     ]
                 }
-                """.formatted(fullShaderPath, fullShaderPath);
+                """.formatted(fullShaderPath, fullShaderPath, uniformsJson);
 
                 return Optional.of(new Resource(null, () -> new ByteArrayInputStream(dummyJson.getBytes(StandardCharsets.UTF_8))));
             }
             return fallback.getResource(location);
         };
     }
+
+    private static StringBuilder getExposedParameters(JsonObject materialJson) {
+
+        StringBuilder uniformsBuilder = new StringBuilder();
+        uniformsBuilder.append("{ \"name\": \"ModelViewMat\", \"type\": \"matrix4x4\", \"count\": 16, \"values\": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ] },");
+        uniformsBuilder.append("{ \"name\": \"ProjMat\", \"type\": \"matrix4x4\", \"count\": 16, \"values\": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ] },");
+        uniformsBuilder.append("{ \"name\": \"CosmosTime\", \"type\": \"float\", \"count\": 1, \"values\": [ 0.0 ] }");
+
+
+        if (materialJson.has("config") && materialJson.getAsJsonObject("config").has("exposed_parameters")) {
+            JsonObject exposed = materialJson.getAsJsonObject("config").getAsJsonObject("exposed_parameters");
+
+            for (String uniformName : exposed.keySet()) {
+                UniformType type = UniformType.fromString(exposed.get(uniformName).getAsString());
+                if (type != null) {
+
+                    String valuesArray = type == UniformType.FLOAT ? "[ 0.0 ]" :
+                                    type == UniformType.INT ? "[0]" :
+                                    type == UniformType.VEC2 ? "[ 0.0, 0.0 ]" :
+                                    type == UniformType.VEC3 ? "[ 0.0, 0.0, 0.0 ]" : "[ 0.0, 0.0, 0.0, 0.0 ]"
+                                    ;
+
+                    uniformsBuilder.append(",\n{ \"name\": \"").append(uniformName)
+                            .append("\", \"type\": \"float\", \"count\": ").append(type.getCount())
+                            .append(", \"values\": ").append(valuesArray).append(" }");
+                }
+            }
+        }
+
+        return uniformsBuilder;
+
+    }
+
+
 }
