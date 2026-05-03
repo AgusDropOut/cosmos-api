@@ -20,7 +20,7 @@ public class CosmosTrailProjectile extends AbstractCosmosTrailProjectile {
     protected CosmosTrailState createDefaultState() {
         return CosmosTrailState.builder()
                 .setMaxHistory(50)
-                .addTrail(new ResourceLocation("cosmos", "fire")) // Core fire
+                .addTrail(new ResourceLocation("cosmos", "fire_trail")) // Core fire
                 .build();
     }
 

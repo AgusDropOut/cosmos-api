@@ -63,7 +63,7 @@ public class CosmosBeamManager {
 
             data.material.applyTo(shader);
 
-            CosmosRenderState.setup(def.config.render_state);
+            CosmosRenderState.setup(data.material.getDefinition().config.renderState);
 
             buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
             renderBeamGeometry(buffer, IDENTITY, data.start, data.end, data.cameraPos, def, timeSeconds);

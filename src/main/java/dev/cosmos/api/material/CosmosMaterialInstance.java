@@ -13,14 +13,13 @@ import java.util.Map;
 public class CosmosMaterialInstance {
     private final ResourceLocation materialId;
     private final Map<String, UniformType> expectedParameters = new HashMap<>();
-
-
+    private final MaterialDefinition definition;
     private final Map<String, Object> values = new HashMap<>();
 
     public CosmosMaterialInstance(ResourceLocation materialId) {
         this.materialId = materialId;
 
-        MaterialDefinition definition = MaterialDataHandler.MATERIALS.get(materialId);
+        this.definition = MaterialDataHandler.MATERIALS.get(materialId);
         if (definition == null) {
             throw new IllegalArgumentException("Cosmos API: Material '" + materialId + "' does not exist!");
         }
@@ -81,6 +80,10 @@ public class CosmosMaterialInstance {
 
             }
         }
+    }
+
+    public MaterialDefinition getDefinition() {
+        return this.definition;
     }
 
     public Map<String, Object> getValues() {

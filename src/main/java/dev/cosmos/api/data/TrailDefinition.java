@@ -26,13 +26,9 @@ public class TrailDefinition {
         public String orbitOffset;
         @SerializedName("material_id")
         public String materialId;
-        public RenderState render_state;
     }
 
-    public static class RenderState {
-        public String transparency; // e.g., "ADDITIVE", "TRANSLUCENT", "OPAQUE"
-        public String depth_test;   // e.g., "LEQUAL", "NONE"
-    }
+
 
     public void compileExpressions() {
         //  Compile Width

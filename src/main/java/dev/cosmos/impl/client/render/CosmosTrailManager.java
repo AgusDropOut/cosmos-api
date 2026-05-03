@@ -72,7 +72,7 @@ public class CosmosTrailManager {
 
             data.material.applyTo(shader);
 
-            CosmosRenderState.setup(trailDef.config.render_state);
+            CosmosRenderState.setup(data.material.getDefinition().config.renderState);
 
             //RenderSystem.setShaderTexture(0, net.minecraft.world.inventory.InventoryMenu.BLOCK_ATLAS);
 

@@ -1,0 +1,15 @@
+{
+    "namespace": "cosmos",
+    "id": "fire_trail",
+    "type": "cosmos:material",
+    "config": {
+        "exposed_parameters": {},
+        "render_state": {
+            "blend_mode": "TRANSLUCENT",
+            "cull_mode": "NONE",
+            "depth_test": "ALWAYS",
+            "depth_write": true,
+            "alpha_cutoff": 0.15
+        }
+    }
+}

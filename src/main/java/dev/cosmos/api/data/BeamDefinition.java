@@ -32,7 +32,6 @@ public class BeamDefinition {
         public String offsetZ;
         @SerializedName("material_id")
         public String materialId;
-        public TrailDefinition.RenderState render_state;
     }
 
     public void compileExpressions() {

@@ -1,15 +1,17 @@
+// dev/cosmos/impl/client/render/CosmosRenderState.java
 package dev.cosmos.impl.client.render;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import dev.cosmos.api.data.TrailDefinition;
+import com.mojang.blaze3d.platform.GlStateManager;
+import dev.cosmos.api.data.MaterialDefinition;
 
 public class CosmosRenderState {
 
     public static void beginBatch() {
         RenderSystem.enableBlend();
         RenderSystem.blendFunc(
-                com.mojang.blaze3d.platform.GlStateManager.SourceFactor.SRC_ALPHA,
-                com.mojang.blaze3d.platform.GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA
+                GlStateManager.SourceFactor.SRC_ALPHA,
+                GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA
         );
         RenderSystem.disableCull();
         RenderSystem.depthMask(false);
@@ -22,39 +24,57 @@ public class CosmosRenderState {
         RenderSystem.disableBlend();
     }
 
-    public static void setup(TrailDefinition.RenderState state) {
+
+    public static void setup(MaterialDefinition.RenderState state) {
         if (state == null) {
             restoreToBatchDefault();
             return;
         }
 
-        if ("ADDITIVE".equalsIgnoreCase(state.transparency)) {
-            RenderSystem.blendFunc(
-                    com.mojang.blaze3d.platform.GlStateManager.SourceFactor.SRC_ALPHA,
-                    com.mojang.blaze3d.platform.GlStateManager.DestFactor.ONE
-            );
-        } else if ("OPAQUE".equalsIgnoreCase(state.transparency)) {
+        //BLEND MODE
+        if ("ADDITIVE".equalsIgnoreCase(state.blendMode)) {
+            RenderSystem.enableBlend();
+            RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE);
+        } else if ("MULTIPLY".equalsIgnoreCase(state.blendMode)) {
+            RenderSystem.enableBlend();
+            // Standard Multiply Blend in OpenGL
+            RenderSystem.blendFunc(GlStateManager.SourceFactor.DST_COLOR, GlStateManager.DestFactor.ZERO);
+        } else if ("OPAQUE".equalsIgnoreCase(state.blendMode)) {
             RenderSystem.disableBlend();
         } else {
+            // TRANSLUCENT (Default)
             RenderSystem.enableBlend();
-            RenderSystem.defaultBlendFunc();
+            RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         }
 
-        if ("NONE".equalsIgnoreCase(state.depth_test) || "ALWAYS".equalsIgnoreCase(state.depth_test)) {
+        //  CULL MODE
+        if ("NONE".equalsIgnoreCase(state.cullMode)) {
+            RenderSystem.disableCull(); // Double-sided
+        } else {
+            RenderSystem.enableCull(); // Standard back-face culling
+        }
+
+        // DEPTH TEST
+        if ("ALWAYS".equalsIgnoreCase(state.depthTest)) {
             RenderSystem.disableDepthTest();
         } else {
             RenderSystem.enableDepthTest();
             RenderSystem.depthFunc(515);
         }
+
+        // DEPTH WRITE (Z-Buffer)
+        RenderSystem.depthMask(state.depthWrite);
     }
 
     public static void restoreToBatchDefault() {
         RenderSystem.enableBlend();
         RenderSystem.blendFunc(
-                com.mojang.blaze3d.platform.GlStateManager.SourceFactor.SRC_ALPHA,
-                com.mojang.blaze3d.platform.GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA
+                GlStateManager.SourceFactor.SRC_ALPHA,
+                GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA
         );
         RenderSystem.enableDepthTest();
         RenderSystem.depthFunc(515);
+        RenderSystem.enableCull();
+        RenderSystem.depthMask(true);
     }
 }
