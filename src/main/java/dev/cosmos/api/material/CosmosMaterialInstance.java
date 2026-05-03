@@ -61,6 +61,14 @@ public class CosmosMaterialInstance {
     public void applyTo(ShaderInstance shader) {
         if (shader == null) return;
 
+
+        if (definition.config != null && definition.config.renderState != null) {
+            Uniform alphaUniform = shader.getUniform("u_alphaCutoff");
+            if (alphaUniform != null) {
+                alphaUniform.set(definition.config.renderState.alphaCutoff);
+            }
+        }
+
         for (Map.Entry<String, Object> entry : values.entrySet()) {
             String name = entry.getKey();
             Object value = entry.getValue();
