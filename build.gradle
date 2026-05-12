@@ -33,6 +33,8 @@ minecraft {
             }
         }
 
+
+
         client {
             property 'forge.enabledGameTestNamespaces', mod_id
         }
@@ -43,7 +45,11 @@ minecraft {
         }
 
         gameTestServer {
-            property 'forge.enabledGameTestNamespaces', mod_id
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            property 'forge.enabledGameTestNamespaces', 'cosmos'
+            mods { cosmos { source sourceSets.main } }
         }
 
         data {
@@ -60,6 +66,9 @@ repositories {
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
 }
 
 tasks.named('processResources', ProcessResources).configure {
@@ -98,6 +107,10 @@ tasks.named('jar', Jar).configure {
     }
 
     finalizedBy 'reobfJar'
+}
+
+test {
+    useJUnitPlatform()
 }
 
 tasks.withType(JavaCompile).configureEach {

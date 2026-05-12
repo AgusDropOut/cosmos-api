@@ -15,6 +15,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.RegisterGameTestsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -35,14 +36,12 @@ public class Cosmos {
     public static final Logger LOGGER = LogUtils.getLogger();
 
 
-    public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
 
     public Cosmos() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
         ModItems.register(modEventBus);
         ModEntityTypes.register(modEventBus);
-        CREATIVE_MODE_TABS.register(modEventBus);
 
         CosmosDataRegistry.register("cosmos:trail_system", new TrailDataHandler());
         CosmosDataRegistry.register("cosmos:beam_system", new BeamDataHandler());
@@ -59,6 +58,15 @@ public class Cosmos {
 
 
         MinecraftForge.EVENT_BUS.register(this);
+    }
+
+    @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
+    public static class ModEvents {
+        @SubscribeEvent
+        public static void onRegisterGameTests(RegisterGameTestsEvent event) {
+            LOGGER.info("Cosmos API: Manually registering GameTests...");
+            event.register(dev.cosmos.test.gametest.CosmosEntityGameTests.class);
+        }
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {

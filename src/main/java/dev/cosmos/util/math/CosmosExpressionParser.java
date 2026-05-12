@@ -57,8 +57,10 @@ public class CosmosExpressionParser {
                     while ((ch >= '0' && ch <= '9') || ch == '.') nextChar();
                     float val = Float.parseFloat(str.substring(startPos, this.pos));
                     x = (t, v) -> val;
-                } else if (ch >= 'a' && ch <= 'z') {
-                    while (ch >= 'a' && ch <= 'z') nextChar();
+                } else if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '_') {
+                    while ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || ch == '_') {
+                        nextChar();
+                    }
                     String func = str.substring(startPos, this.pos);
 
                     // Variables
@@ -96,7 +98,7 @@ public class CosmosExpressionParser {
                     throw new RuntimeException("Unexpected: " + (char)ch);
                 }
 
-                // Fallback for infix exponentiation just in case (e.g. a^b)
+
                 if (eat('^')) { MathExpression a = x, b = parseFactor(); x = (t, v) -> (float) Math.pow(a.evaluate(t, v), b.evaluate(t, v)); }
                 return x;
             }

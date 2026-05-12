@@ -1,0 +1,14 @@
+{
+    "namespace": "cosmos",
+    "id": "valid_beam",
+    "type": "cosmos:beam_system",
+    "config": {
+        "radial_segments": 8,
+        "length_segments": 40,
+        "radius_curve": "(sin(((v * 10.0) - (time * 5.0))) * 1.5)",
+        "offset_x": "(sin(((v * 10.0) - (time * 5.0))) * 1.5)",
+        "offset_y": "0.0",
+        "offset_z": "(cos(((v * 10.0) - (time * 5.0))) * 1.5)",
+        "material_id": "cosmos:valid_mat"
+    }
+}

@@ -1,0 +1,11 @@
+{
+    "namespace": "cosmos",
+    "id": "valid_trail",
+    "type": "cosmos:trail_system",
+    "config": {
+        "history_segments": 30,
+        "width_curve": "max(abs(sin((time * 5.0))), 0.2)",
+        "orbit_offset": "vec3((sin((time * 10.0)) * 1.5), (cos((time * 10.0)) * 1.5), (0.0 * 1.5))",
+        "material_id": "cosmos:valid_trail"
+    }
+}
