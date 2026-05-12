@@ -51,6 +51,7 @@ public class Cosmos {
         modEventBus.addListener(this::commonSetup);
 
         CosmosAPI.registerBeamEntity(ModEntityTypes.BEAM_ENTITY);
+        CosmosAPI.registerBeamEntity(ModEntityTypes.EXPOSED_PARAMETERS_BEAM);
         CosmosAPI.registerTrailEntity(ModEntityTypes.TEST_PROJECTILE);
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, CosmosConfig.SPEC, "cosmos-common.toml");

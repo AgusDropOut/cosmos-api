@@ -1,6 +1,7 @@
 package dev.cosmos.impl.client.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.cosmos.api.entity.CosmosRenderLayer;
 import dev.cosmos.api.entity.CosmosTrailState;
 import dev.cosmos.api.entity.ICosmosTrail;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -58,8 +59,8 @@ public class CosmosTrailRenderer<T extends Entity & ICosmosTrail> extends Entity
         Matrix4f pureCameraMatrix = viewStack.last().pose();
 
 
-        for (CosmosTrailState.TrailLayer layer : state.getLayers()) {
-            CosmosTrailManager.submitTrail(layer.trailId, layer.material, rawHistory, cameraPos, pureCameraMatrix);
+        for (CosmosRenderLayer layer : state.getLayers()) {
+            CosmosTrailManager.submitTrail(layer.id, layer.material, rawHistory, cameraPos, pureCameraMatrix);
         }
 
         super.render(entity, entityYaw, partialTicks, poseStack, bufferSource, packedLight);

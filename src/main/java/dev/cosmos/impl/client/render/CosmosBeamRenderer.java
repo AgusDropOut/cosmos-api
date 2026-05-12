@@ -1,6 +1,7 @@
 package dev.cosmos.impl.client.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.cosmos.api.entity.CosmosRenderLayer;
 import dev.cosmos.api.entity.ICosmosBeam;
 import dev.cosmos.api.entity.CosmosBeamState;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -52,8 +53,8 @@ public class CosmosBeamRenderer<T extends Entity & ICosmosBeam> extends EntityRe
         Matrix4f pureCameraMatrix = viewStack.last().pose();
 
         //  Submit
-        for(CosmosBeamState.BeamLayer layer : state.getLayers()) {
-            CosmosBeamManager.submitBeam(layer.beamId, layer.material, finalStart, finalEndpoint, cameraPos, pureCameraMatrix);
+        for(CosmosRenderLayer layer : state.getLayers()) {
+            CosmosBeamManager.submitBeam(layer.id, layer.material, finalStart, finalEndpoint, cameraPos, pureCameraMatrix);
         }
 
         super.render(entity, entityYaw, partialTick, poseStack, buffer, packedLight);

@@ -2,6 +2,7 @@ package dev.cosmos.init;
 
 import dev.cosmos.Cosmos;
 
+import dev.cosmos.example.entity.ExampleExposedParameterBeamEntity;
 import dev.cosmos.example.entity.ExampleFireBeamEntity;
 import dev.cosmos.example.entity.ExampleFireTrailProjectileEntity;
 import net.minecraft.world.entity.EntityType;
@@ -24,6 +25,12 @@ public class ModEntityTypes {
                             .build("test_projectile"));
     public static final RegistryObject<EntityType<ExampleFireBeamEntity>> BEAM_ENTITY = ENTITY_TYPES.register("beam_entity",
             () -> EntityType.Builder.<ExampleFireBeamEntity>of(ExampleFireBeamEntity::new, MobCategory.MISC)
+                    .sized(0.5F, 0.5F)
+                    .clientTrackingRange(64)
+                    .updateInterval(1)
+                    .build("beam_entity"));
+    public static final RegistryObject<EntityType<ExampleExposedParameterBeamEntity>> EXPOSED_PARAMETERS_BEAM = ENTITY_TYPES.register("exposed_parameters_beam_entity",
+            () -> EntityType.Builder.<ExampleExposedParameterBeamEntity>of(ExampleExposedParameterBeamEntity::new, MobCategory.MISC)
                     .sized(0.5F, 0.5F)
                     .clientTrackingRange(64)
                     .updateInterval(1)

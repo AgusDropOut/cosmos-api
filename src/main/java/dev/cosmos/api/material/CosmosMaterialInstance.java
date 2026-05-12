@@ -59,6 +59,7 @@ public class CosmosMaterialInstance {
      * Called every frame by the renderer to push these values to the GPU.
      */
     public void applyTo(ShaderInstance shader) {
+
         if (shader == null) return;
 
 

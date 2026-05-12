@@ -1,5 +1,6 @@
 package dev.cosmos.api.entity;
 
+import dev.cosmos.api.data.TrailDefinition;
 import dev.cosmos.api.material.CosmosMaterialInstance;
 import dev.cosmos.impl.data.handler.TrailDataHandler;
 import net.minecraft.resources.ResourceLocation;
@@ -12,27 +13,17 @@ import java.util.List;
 
 public class CosmosTrailState {
 
-    public static class TrailLayer {
-        public final ResourceLocation trailId;
-        public final CosmosMaterialInstance material;
-
-        public TrailLayer(ResourceLocation trailId, CosmosMaterialInstance material) {
-            this.trailId = trailId;
-            this.material = material;
-        }
-    }
-
     private final Deque<Vec3> history = new ArrayDeque<>();
     private final int maxHistory;
-    private final List<TrailLayer> layers;
+    private final List<CosmosRenderLayer> layers;
 
-    private CosmosTrailState(int maxHistory, List<TrailLayer> layers) {
+    private CosmosTrailState(int maxHistory, List<CosmosRenderLayer> layers) {
         this.maxHistory = maxHistory;
         this.layers = new ArrayList<>(layers);
     }
 
     public Deque<Vec3> getHistory() { return this.history; }
-    public List<TrailLayer> getLayers() { return this.layers; }
+    public List<CosmosRenderLayer> getLayers() { return this.layers; }
 
     public void tickHistory(Vec3 currentPos) {
         this.history.addFirst(currentPos);
@@ -41,54 +32,33 @@ public class CosmosTrailState {
         }
     }
 
-    // BUILDER PATTERN
     public static Builder builder() {
         return new Builder();
     }
 
-    public static class Builder {
-        private int maxHistory = 20; // Default fallback
-        private final List<TrailLayer> pendingLayers = new ArrayList<>();
+    public static class Builder extends AbstractLayeredBuilder<Builder, CosmosTrailState> {
+        private int maxHistory = 20;
 
         public Builder setMaxHistory(int maxHistory) {
             this.maxHistory = maxHistory;
             return this;
         }
 
-        /* Two addTrail methods are provided for convenience:
-           - The first allows adding a trail by ID, with the material auto-resolved from the trail definition.
-           - The second allows specifying a material override directly, bypassing auto-resolution. */
-        public Builder addTrail(ResourceLocation trailId) {
-            this.pendingLayers.add(new TrailLayer(trailId, null));
-            return this;
-        }
-        public Builder addTrail(ResourceLocation trailId, CosmosMaterialInstance materialOverride) {
-            this.pendingLayers.add(new TrailLayer(trailId, materialOverride));
-            return this;
+        public Builder addTrail(ResourceLocation trailId) { return this.addLayer(trailId); }
+        public Builder addTrail(ResourceLocation trailId, CosmosMaterialInstance materialOverride) { return this.addLayer(trailId, materialOverride); }
+
+        @Override
+        protected ResourceLocation autoResolveMaterial(ResourceLocation id) {
+            TrailDefinition def = TrailDataHandler.TRAILS.get(id);
+            if (def != null && def.config != null && def.config.materialId != null) {
+                return new ResourceLocation(def.config.materialId);
+            }
+            return null;
         }
 
+        @Override
         public CosmosTrailState build() {
-            if (this.pendingLayers.isEmpty()) {
-                throw new IllegalStateException("Cosmos API Error: A Trail Entity was created without any trails!");
-            }
-
-            List<TrailLayer> finalizedLayers = new ArrayList<>();
-
-            for (TrailLayer layer : this.pendingLayers) {
-                if (layer.material != null) {
-                    finalizedLayers.add(layer);
-                } else {
-                    dev.cosmos.api.data.TrailDefinition def = TrailDataHandler.TRAILS.get(layer.trailId);
-                    if (def != null && def.config != null && def.config.materialId != null) {
-                        CosmosMaterialInstance autoMat = new CosmosMaterialInstance(new ResourceLocation(def.config.materialId));
-                        finalizedLayers.add(new TrailLayer(layer.trailId, autoMat));
-                    } else {
-                        throw new IllegalStateException("Cosmos API: Cannot auto-resolve material for trail '" + layer.trailId + "'");
-                    }
-                }
-            }
-
-            return new CosmosTrailState(this.maxHistory, finalizedLayers);
+            return new CosmosTrailState(this.maxHistory, this.resolveLayers("Trail"));
         }
     }
 }

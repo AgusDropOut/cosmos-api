@@ -1,0 +1,14 @@
+{
+    "namespace": "cosmos",
+    "id": "example_exposed_parameters_beam",
+    "type": "cosmos:beam_system",
+    "config": {
+        "radial_segments": 19,
+        "length_segments": 1,
+        "radius_curve": "0.5",
+        "offset_x": "0.0",
+        "offset_y": "0.0",
+        "offset_z": "0.0",
+        "material_id": "cosmos:example_exposed_parameters_beam"
+    }
+}
