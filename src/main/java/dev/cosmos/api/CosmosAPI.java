@@ -6,7 +6,12 @@ import java.util.List;
 import java.util.function.Supplier;
 
 /**
- * The main entry point for developers using the Cosmos API.
+ * The primary registration gateway for the Cosmos VFX framework.
+ * <p>
+ * Modders must register their custom entity types through this API to ensure they are
+ * intercepted and processed by the correct internal Cosmos renderers (e.g., {@link dev.cosmos.impl.client.render.CosmosBeamRenderer}).
+ * <p>
+ * Registration methods should be invoked during the mod constructor or standard FML setup phases.
  */
 public class CosmosAPI {
 

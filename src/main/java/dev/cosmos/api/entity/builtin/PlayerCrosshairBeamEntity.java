@@ -100,7 +100,6 @@ public abstract class PlayerCrosshairBeamEntity extends AbstractCosmosBeamEntity
 
     @Override
     protected void readAdditionalSaveData(CompoundTag tag) {
-
     }
 
     @Override

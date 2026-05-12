@@ -10,6 +10,17 @@ import org.joml.Vector3f;
 import java.util.HashMap;
 import java.util.Map;
 
+
+/**
+ * Represents a dynamic, mutable instance of a loaded Cosmos Material (.mat.csm.json).
+ * <p>
+ * This class allows developers to modify shader uniforms (variables exposed in the JSON)
+ * on a per-entity, per-tick basis.
+ * <p>
+ * <b>Important:</b> Uniform mutations are inherently client-side operations. While the
+ * API allows setting values on the logical server, it is highly recommended to perform
+ * intensive uniform updates (like color interpolation) on the client to save network bandwidth.
+ */
 public class CosmosMaterialInstance {
     private final ResourceLocation materialId;
     private final Map<String, UniformType> expectedParameters = new HashMap<>();
@@ -32,13 +43,38 @@ public class CosmosMaterialInstance {
         }
     }
 
-    // Type-Safe Setters
+    /**
+     * Sets a floating-point uniform value for the shader.
+     * <p>
+     * <b>Important:</b> You may need to add a {@code u_} prefix to the name
+     * due to shader naming conventions.
+     *
+     * @param name  The exact name of the uniform as defined in the material's JSON "exposed_parameters".
+     * @param value The float value to pass to the shader.
+     * @return This instance for method chaining.
+     * @throws IllegalArgumentException If the uniform name is not exposed in the JSON, or if the declared type is not FLOAT.
+     */
     public CosmosMaterialInstance setFloat(String name, float value) {
         validateType(name, UniformType.FLOAT);
         values.put(name, value);
         return this;
     }
 
+
+    /**
+     * Sets a 3-component vector uniform value for the shader, typically used for RGB colors or 3D coordinates.
+     * <p>
+     * <b>Important:</b> You may need to add a {@code u_} prefix to the name
+     * due to shader naming conventions.
+     *
+     *
+     * @param name The exact name of the uniform as defined in the material's JSON "exposed_parameters".
+     * @param r    The first component (X or Red).
+     * @param g    The second component (Y or Green).
+     * @param b    The third component (Z or Blue).
+     * @return This instance for method chaining.
+     * @throws IllegalArgumentException If the uniform name is not exposed in the JSON, or if the declared type is not VEC3.
+     */
     public CosmosMaterialInstance setVec3(String name, float r, float g, float b) {
         validateType(name, UniformType.VEC3);
         values.put(name, new Vector3f(r, g, b));
@@ -56,7 +92,10 @@ public class CosmosMaterialInstance {
     }
 
     /**
-     * Called every frame by the renderer to push these values to the GPU.
+     * Pushes the current uniform values to the active GPU shader instance.
+     * This is invoked automatically by the internal Cosmos renderers every frame.
+     *
+     * @param shader The active shader instance to receive the uniform data.
      */
     public void applyTo(ShaderInstance shader) {
 
