@@ -7,7 +7,7 @@
         "render_state": {
             "blend_mode": "TRANSLUCENT",
             "cull_mode": "NONE",
-            "depth_test": "ALWAYS",
+            "depth_test": "LEQUAL",
             "depth_write": true,
             "alpha_cutoff": 0.15
         }
