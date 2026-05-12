@@ -1,6 +1,6 @@
 {
     "namespace": "cosmos",
-    "id": "fire_trail",
+    "id": "example_fire_trail",
     "type": "cosmos:material",
     "config": {
         "exposed_parameters": {},

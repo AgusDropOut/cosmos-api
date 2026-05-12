@@ -1,8 +1,8 @@
 package dev.cosmos.init;
 
 import dev.cosmos.Cosmos;
-import dev.cosmos.impl.test.CosmosBeamTestItem;
-import dev.cosmos.impl.test.CosmosTestItem;
+import dev.cosmos.example.item.ExampleBeamItem;
+import dev.cosmos.example.item.ExampleTrailItem;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -14,9 +14,9 @@ public class ModItems {
             DeferredRegister.create(ForgeRegistries.ITEMS, Cosmos.MODID);
 
     public static final RegistryObject<Item> TEST_WAND = ITEMS.register("test_wand",
-            () -> new CosmosTestItem(new Item.Properties()));
+            () -> new ExampleTrailItem(new Item.Properties()));
     public static final RegistryObject<Item> TEST_BEAM = ITEMS.register("test_beam",
-            () -> new CosmosBeamTestItem(new Item.Properties()));
+            () -> new ExampleBeamItem(new Item.Properties()));
 
 
     public static void register(IEventBus eventBus) {

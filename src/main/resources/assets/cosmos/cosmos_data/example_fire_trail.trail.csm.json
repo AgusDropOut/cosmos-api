@@ -1,11 +1,11 @@
 {
     "namespace": "cosmos",
-    "id": "fire_trail",
+    "id": "example_fire_trail",
     "type": "cosmos:trail_system",
     "config": {
         "history_segments": 50,
         "width_curve": "1.5",
         "orbit_offset": "vec3((sin((time * 7.3)) * 3.0), 0.0, (cos((time * 7.3)) * 3.0))",
-        "material_id": "cosmos:fire_trail"
+        "material_id": "cosmos:example_fire_trail"
     }
 }

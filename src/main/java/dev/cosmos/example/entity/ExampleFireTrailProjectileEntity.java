@@ -1,4 +1,4 @@
-package dev.cosmos.impl.test;
+package dev.cosmos.example.entity;
 
 import dev.cosmos.api.entity.AbstractCosmosTrailProjectile;
 import dev.cosmos.api.entity.CosmosTrailState;
@@ -10,9 +10,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.network.NetworkHooks;
 
-public class CosmosTrailProjectile extends AbstractCosmosTrailProjectile {
+public class ExampleFireTrailProjectileEntity extends AbstractCosmosTrailProjectile {
 
-    public CosmosTrailProjectile(EntityType<? extends CosmosTrailProjectile> type, Level level) {
+    public ExampleFireTrailProjectileEntity(EntityType<? extends ExampleFireTrailProjectileEntity> type, Level level) {
         super(type, level);
     }
 
@@ -20,7 +20,7 @@ public class CosmosTrailProjectile extends AbstractCosmosTrailProjectile {
     protected CosmosTrailState createDefaultState() {
         return CosmosTrailState.builder()
                 .setMaxHistory(50)
-                .addTrail(new ResourceLocation("cosmos", "fire_trail")) // Core fire
+                .addTrail(new ResourceLocation("cosmos", "example_fire_trail"))
                 .build();
     }
 

@@ -1,8 +1,8 @@
-package dev.cosmos.impl.test;
+package dev.cosmos.example.item;
 
 
+import dev.cosmos.example.entity.ExampleFireBeamEntity;
 import dev.cosmos.init.ModEntityTypes;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
@@ -12,9 +12,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
 
-public class CosmosBeamTestItem extends Item {
+public class ExampleBeamItem extends Item {
 
-    public CosmosBeamTestItem(Properties properties) {
+    public ExampleBeamItem(Properties properties) {
         super(properties);
     }
 
@@ -27,7 +27,7 @@ public class CosmosBeamTestItem extends Item {
 
         if (!level.isClientSide) {
 
-            CosmosBeamEntity beam = new CosmosBeamEntity(ModEntityTypes.BEAM_ENTITY.get(),level, player);
+            ExampleFireBeamEntity beam = new ExampleFireBeamEntity(ModEntityTypes.BEAM_ENTITY.get(),level, player, 50f);
             level.addFreshEntity(beam);
         }
 
@@ -41,7 +41,6 @@ public class CosmosBeamTestItem extends Item {
 
     @Override
     public int getUseDuration(ItemStack stack) {
-
         return 72000;
     }
 

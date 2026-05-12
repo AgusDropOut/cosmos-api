@@ -48,10 +48,6 @@ public class Cosmos {
         CosmosDataRegistry.register("cosmos:beam_system", new BeamDataHandler());
         CosmosDataRegistry.register("cosmos:material", new MaterialDataHandler());
 
-
-
-
-
         modEventBus.addListener(this::commonSetup);
 
         CosmosAPI.registerBeamEntity(ModEntityTypes.BEAM_ENTITY);

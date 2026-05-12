@@ -74,8 +74,6 @@ public class CosmosTrailManager {
 
             CosmosRenderState.setup(data.material.getDefinition().config.renderState);
 
-            //RenderSystem.setShaderTexture(0, net.minecraft.world.inventory.InventoryMenu.BLOCK_ATLAS);
-
             List<Vec3> smoothHistory = generateSmoothHistory(data.history);
             buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX);
             renderTrailGeometry(buffer, IDENTITY, smoothHistory, data.cameraPos, trailDef, timeSeconds);
