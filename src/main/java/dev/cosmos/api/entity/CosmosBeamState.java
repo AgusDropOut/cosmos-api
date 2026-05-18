@@ -80,7 +80,7 @@ public class CosmosBeamState {
         }
 
         @Override
-        protected ResourceLocation autoResolveMaterial(ResourceLocation id) {
+        public ResourceLocation autoResolveMaterial(ResourceLocation id) {
             BeamDefinition def = BeamDataHandler.BEAMS.get(id);
             if (def != null && def.config != null && def.config.materialId != null) {
                 return new ResourceLocation(def.config.materialId);

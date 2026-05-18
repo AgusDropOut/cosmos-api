@@ -94,7 +94,7 @@ public abstract class AbstractLayeredBuilder<B extends AbstractLayeredBuilder<B,
     /**
      * Resolves the Material ID specified in the JSON definition.
      */
-    protected abstract ResourceLocation autoResolveMaterial(ResourceLocation id);
+    public abstract ResourceLocation autoResolveMaterial(ResourceLocation id);
 
 
     /**

@@ -81,7 +81,7 @@ public class CosmosTrailState {
         public Builder addTrail(ResourceLocation trailId, CosmosMaterialInstance materialOverride) { return this.addLayer(trailId, materialOverride); }
 
         @Override
-        protected ResourceLocation autoResolveMaterial(ResourceLocation id) {
+        public ResourceLocation autoResolveMaterial(ResourceLocation id) {
             TrailDefinition def = TrailDataHandler.TRAILS.get(id);
             if (def != null && def.config != null && def.config.materialId != null) {
                 return new ResourceLocation(def.config.materialId);
